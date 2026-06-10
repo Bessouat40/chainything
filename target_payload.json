@@ -1,0 +1,26 @@
+{
+  "processors": [
+    {
+      "id": "processor1",
+      "input": {},
+      "output": {
+        "id": "processor1_output"
+      },
+      "type": "ImageReader",
+      "parameters": {
+        "filePath": "./data/img.jpg"
+      }
+    },
+    {
+      "id": "processor2",
+      "input": {
+        "id": "processor1_output"
+      },
+      "output": {
+        "id": "processor2_output"
+      },
+      "type": "GreyScale",
+      "parameters": {}
+    }
+  ]
+}

@@ -1,12 +1,19 @@
-pub trait Processor {
-    type Input: 'static;
-    type Output: 'static;
+use std::{any::{Any, TypeId}, sync::Arc};
 
-    fn process(&self, input: &Self::Input, parameters: Option<std::collections::HashMap<String, Box<dyn std::any::Any>>>) -> Self::Output;
+pub trait Processor {
+    fn input_type(&self) -> TypeId;
+
+    fn set_input(&mut self, input: Arc<dyn Any + Send + Sync>);
+    fn get_output(&self) -> Option<Arc<dyn Any + Send + Sync>>;
+    
+    fn output_type(&self) -> TypeId;
+
+    fn process(&mut self) -> Result<(), ProcessorError>;
 }
 
-pub struct RawImage {
-    pub width: u32,
-    pub height: u32,
-    pub pixels: Vec<u8>,
+#[derive(Debug)]
+pub enum ProcessorError {
+    InvalidInput(String),
+    ComputingError(String),
+    MissingInput,
 }
