@@ -1,8 +1,8 @@
 pub trait Processor {
-    type Input;
-    type Output;
+    type Input: 'static;
+    type Output: 'static;
 
-    fn process(&self, input: &Self::Input) -> Self::Output;
+    fn process(&self, input: &Self::Input, parameters: Option<std::collections::HashMap<String, Box<dyn std::any::Any>>>) -> Self::Output;
 }
 
 pub struct RawImage {

@@ -6,7 +6,7 @@ impl Processor for GreyScaleProcessor {
     type Input = RawImage;
     type Output = RawImage;
 
-    fn process(&self, input: &Self::Input) -> Self::Output {
+    fn process(&self, input: &Self::Input, _parameters: Option<std::collections::HashMap<String, Box<dyn std::any::Any>>>) -> Self::Output {
         let mut greyscale_image: Vec<u8> = Vec::new();
         for chunk in input.pixels.chunks(3) {
             let value = 0.299 * (chunk[0] as f32)
