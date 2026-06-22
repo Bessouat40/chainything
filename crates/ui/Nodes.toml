@@ -1,0 +1,96 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# nodes.toml — Node definitions for Chainything UI
+#
+# kind = "pipeline"  →  executed by chainything (serialized to JSON)
+# kind = "ui"        →  handled by the UI only (never sent to chainything)
+#
+# Place this file next to the chainything-ui binary, or in your project root.
+# ─────────────────────────────────────────────────────────────────────────────
+
+[[nodes]]
+type_name = "ImageReader"
+label = "Image Reader"
+description = "Reads an image from disk"
+color = [80, 160, 255]
+kind = "pipeline"
+
+[[nodes.inputs]]
+label = "Path"
+accepts_literal = true
+
+[nodes.output]
+type_name = "Image"
+
+# ─────────────────────────────────────────────────────────────────────────────
+
+[[nodes]]
+type_name = "Greyscale"
+label = "Greyscale"
+description = "Converts image to greyscale"
+color = [160, 100, 255]
+kind = "pipeline"
+
+[[nodes.inputs]]
+label = "Image"
+accepts_literal = false
+
+[nodes.output]
+type_name = "Image"
+
+# ─────────────────────────────────────────────────────────────────────────────
+
+[[nodes]]
+type_name = "ImageSave"
+label = "Image Save"
+description = "Saves image to disk"
+color = [80, 210, 140]
+kind = "pipeline"
+
+[[nodes.inputs]]
+label = "Image"
+accepts_literal = false
+
+[[nodes.inputs]]
+label = "Path"
+accepts_literal = true
+
+[nodes.output]
+type_name = "Path"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# UI-only nodes — add your custom nodes below
+# ─────────────────────────────────────────────────────────────────────────────
+
+[[nodes]]
+type_name = "DisplayImage"
+label = "Display Image"
+description = "Previews the image in the UI (UI only)"
+color = [255, 200, 60]
+kind = "ui"
+
+[[nodes.inputs]]
+label = "Image"
+accepts_literal = false
+
+[nodes.output]
+type_name = "None"
+
+[[nodes]]
+type_name = "UploadFile"
+label = "Upload File"
+description = "Pick a file from disk (UI only)"
+color = [255, 120, 80]
+kind = "ui"
+
+[nodes.output]
+type_name = "Path"
+
+[[nodes]]
+type_name = "TextInput"
+label = "Text Input"
+description = "Enter text with custom UI (UI only)"
+color = [100, 200, 180]
+kind = "ui"
+
+[nodes.output]
+type_name = "Text"
