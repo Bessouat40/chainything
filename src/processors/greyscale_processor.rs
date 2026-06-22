@@ -9,13 +9,15 @@ pub struct RawImage {
 }
 
 pub struct GreyScaleProcessor {
+    id: String,
     input: Option<Arc<RawImage>>,
     output: Option<Arc<RawImage>>
 }
 
 impl GreyScaleProcessor {
-    pub fn new() -> GreyScaleProcessor {
+    pub fn new(id: String) -> GreyScaleProcessor {
             GreyScaleProcessor {
+                id,
                 input: None,
                 output: None
             }
@@ -23,12 +25,26 @@ impl GreyScaleProcessor {
 }
 
 impl Processor for GreyScaleProcessor {
-
     type Input = RawImage;
     type Output = RawImage;
 
-    fn set_input(&mut self, input: Arc<RawImage>) {
-        self.input = Some(input);
+    fn id(&self) -> &str {
+        &self.id
+    }
+
+    fn set_input(&mut self, mut inputs: Vec<Arc<dyn std::any::Any + Send + Sync>>) -> Result<(), ProcessorError> {
+        if inputs.is_empty() {
+            return Err(ProcessorError::MissingInput(format!("Processor {} requires 1 input, got 0", self.id())));
+        }
+        
+        let first_input = inputs.remove(0);
+        
+        if let Ok(typed_image) = first_input.downcast::<RawImage>() {
+            self.input = Some(typed_image);
+            Ok(())
+        } else {
+            Err(ProcessorError::InvalidInput(format!("Invalid input type (expected RawImage) for processor {}", self.id())))
+        }
     }
 
     fn get_output(&self) -> Option<Arc<RawImage>> {
@@ -57,7 +73,7 @@ impl Processor for GreyScaleProcessor {
     
             Ok(())
         } else {
-            Err(ProcessorError::MissingInput)
+            Err(ProcessorError::MissingInput(format!("Missing input for processor {}", self.id())))
         }
     }
 }

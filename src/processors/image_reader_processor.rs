@@ -6,22 +6,37 @@ use image::GenericImageView;
 
 pub struct ImageReaderProcessor {
     input: Option<Arc<String>>,
-    output: Option<Arc<RawImage>>
+    output: Option<Arc<RawImage>>,
+    id: String,
 }
 
 impl ImageReaderProcessor {
-    pub fn new() -> ImageReaderProcessor {
-        ImageReaderProcessor { input: None, output: None }
+    pub fn new(id: String) -> ImageReaderProcessor {
+        ImageReaderProcessor { input: None, output: None, id }
     }
 }
 
 impl Processor for ImageReaderProcessor {
-
     type Input = String;
     type Output = RawImage;
 
-    fn set_input(&mut self, input: Arc<String>) {
-        self.input = Some(input);
+    fn id(&self) -> &str {
+        &self.id
+    }
+
+    fn set_input(&mut self, mut inputs: Vec<Arc<dyn std::any::Any + Send + Sync>>) -> Result<(), ProcessorError> {
+        if inputs.is_empty() {
+            return Err(ProcessorError::MissingInput(format!("Processor {} requires 1 input, got 0", self.id())));
+        }
+        
+        let first_input = inputs.remove(0);
+        
+        if let Ok(typed_input) = first_input.downcast::<String>() {
+            self.input = Some(typed_input);
+            Ok(())
+        } else {
+            Err(ProcessorError::InvalidInput(format!("Invalid input type (expected String) for processor {}", self.id())))
+        }
     }
 
     fn get_output(&self) -> Option<Arc<RawImage>> {
@@ -45,7 +60,7 @@ impl Processor for ImageReaderProcessor {
             
             Ok(())
         } else {
-            Err(ProcessorError::MissingInput)
+            Err(ProcessorError::MissingInput(format!("Missing input for processor {}", self.id())))
         }
     }
 }
