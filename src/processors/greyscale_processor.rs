@@ -1,7 +1,6 @@
 use std::{any::Any, sync::Arc};
 
 use crate::processors::base_processor::{Processor, ProcessorError};
-use std::any::{TypeId};
 
 pub struct RawImage {
     pub width: u32,
@@ -25,13 +24,11 @@ impl GreyScaleProcessor {
 
 impl Processor for GreyScaleProcessor {
 
-    fn input_type(&self) -> TypeId {
-        TypeId::of::<RawImage>()
-    }
+    type Input = RawImage;
+    type Output = RawImage;
 
-    fn output_type(&self) -> TypeId {
-        TypeId::of::<RawImage>()
-    }
+    const INPUT: Option<Arc<Self::Input>> = None;
+    const OUTPUT: Option<Arc<Self::Output>> = None;
 
     fn set_input(&mut self, input: Arc<dyn Any + Send + Sync>) {
         self.input = input.downcast::<RawImage>().ok();

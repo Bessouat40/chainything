@@ -1,4 +1,4 @@
-use std::{any::{Any, TypeId}, sync::Arc};
+use std::{any::{Any}, sync::Arc};
 
 use crate::processors::{base_processor::{Processor, ProcessorError}, greyscale_processor::RawImage};
 
@@ -17,20 +17,18 @@ impl ImageReaderProcessor {
 
 impl Processor for ImageReaderProcessor {
 
+    type Input = String;
+    type Output = RawImage;
+
+    const INPUT: Option<Arc<Self::Input>> = None;
+    const OUTPUT: Option<Arc<Self::Output>> = None;
+
     fn set_input(&mut self, input: Arc<dyn Any + Send + Sync>) {
         self.input = input.downcast::<String>().ok();
     }
 
     fn get_output(&self) -> Option<Arc<dyn Any + Send + Sync>> {
         self.output.clone().map(|o| o as Arc<dyn Any + Send + Sync>)
-    }
-
-    fn input_type(&self) -> TypeId {
-        TypeId::of::<String>()
-    }
-
-    fn output_type(&self) -> TypeId {
-        TypeId::of::<RawImage>()
     }
 
     fn process(&mut self) -> Result<(), ProcessorError> {
