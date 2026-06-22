@@ -1,31 +1,39 @@
 {
   "nodes": [
     {
-      "id": "node_1",
+      "id": "reader",
       "type": "ImageReader",
-      "static_params": {
-        "path": "./data/img.jpg"
-      },
-      "inputs": {} 
+      "parameters": {},
+      "inputs": [
+        {
+          "value": "./chat.jpg"
+        }
+      ]
     },
     {
-      "id": "node_2",
-      "type": "GreyScale",
-      "static_params": {},
-      "inputs": {
-        "0": { "source_node": "node_1", "source_slot": 0 }
-      }
+      "id": "greyscale",
+      "type": "Greyscale",
+      "parameters": {},
+      "inputs": [
+        {
+          "source_node": "reader",
+          "source_slot": 0
+        }
+      ]
     },
     {
-      "id": "node_3",
-      "type": "ImageBlender",
-      "static_params": {
-        "blend_mode": "multiply"
-      },
-      "inputs": {
-        "0": { "source_node": "node_2", "source_slot": 0 },
-        "1": { "source_node": "node_1", "source_slot": 0 }
-      }
+      "id": "saver",
+      "type": "ImageSave",
+      "parameters": {},
+      "inputs": [
+        {
+          "source_node": "greyscale",
+          "source_slot": 0
+        },
+        {
+          "value": "./output.png"
+        }
+      ]
     }
   ]
 }
