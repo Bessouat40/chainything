@@ -25,8 +25,6 @@ impl GreyScaleProcessor {
 }
 
 impl Processor for GreyScaleProcessor {
-    type Input = RawImage;
-    type Output = RawImage;
 
     fn id(&self) -> &str {
         &self.id
@@ -47,8 +45,8 @@ impl Processor for GreyScaleProcessor {
         }
     }
 
-    fn get_output(&self) -> Option<Arc<RawImage>> {
-        self.output.clone()
+    fn get_output(&self) -> Vec<Arc<dyn std::any::Any + Send + Sync>> {
+        self.output.clone().into_iter().map(|out| out as Arc<dyn std::any::Any + Send + Sync>).collect()
     }
 
     fn process(&mut self) -> Result<(), ProcessorError> {
