@@ -18,8 +18,6 @@ impl ImageSaveProcessor {
 }
 
 impl Processor for ImageSaveProcessor {
-    type Input = RawImage;
-    type Output = (); 
 
     fn id(&self) -> &str {
         &self.id
@@ -57,8 +55,8 @@ impl Processor for ImageSaveProcessor {
         }
     }
 
-    fn get_output(&self) -> Option<Arc<Self::Output>> {
-        None 
+    fn get_output(&self) -> Vec<Arc<dyn Any + Send + Sync>> {
+        Vec::new()
     }
 
     fn process(&mut self) -> Result<(), ProcessorError> {

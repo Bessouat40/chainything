@@ -81,9 +81,13 @@ impl Pipeline {
                         return Err(PipelineErrors::UnknownProcessor(source_id.clone()));
                     }
 
-                    adj_list.get_mut(source_id).unwrap().push(target_id.clone());
+                    let neighbors = adj_list.get_mut(source_id)
+                        .ok_or_else(|| PipelineErrors::ComputingError(format!("Corrupted graph: {}", source_id)))?;
+                    neighbors.push(target_id.clone());
                     
-                    *in_degree.get_mut(target_id).unwrap() += 1;
+                    let degree = in_degree.get_mut(target_id)
+                        .ok_or_else(|| PipelineErrors::ComputingError(format!("Corrupted graph: {}", target_id)))?;
+                    *degree += 1;
                 }
             }
         }
@@ -102,7 +106,9 @@ impl Pipeline {
 
             if let Some(neighbors) = adj_list.get(&current_id) {
                 for neighbor_id in neighbors {
-                    let degree = in_degree.get_mut(neighbor_id).unwrap();
+                    let degree = in_degree.get_mut(neighbor_id)
+                        .ok_or_else(|| PipelineErrors::ComputingError(format!("Node missing during topological sort: {}", neighbor_id)))?;
+                    
                     *degree -= 1;
 
                     if *degree == 0 {
@@ -141,11 +147,13 @@ impl Pipeline {
                             .ok_or_else(|| PipelineErrors::UnknownInputProcessor(source_id.clone()))?;
                         
                         let index = *output_slot;
-                        let data = source_processor.get_output_erased()
-                            .into_iter()
-                            .nth(index)
-                            .flatten()
-                            .ok_or_else(|| PipelineErrors::ComputingError(format!("Missing output {} for {} processor", index, source_id)))?;
+                        
+                        let outputs = source_processor.get_output_erased();
+                        let data = outputs.get(index)
+                            .cloned()
+                            .ok_or_else(|| PipelineErrors::ComputingError(
+                                format!("Missing output {} for {} processor", index, source_id)
+                            ))?;
                         
                         inputs.push(data);
                     }
