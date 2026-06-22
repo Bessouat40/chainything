@@ -1,7 +1,6 @@
-use std::{any::Any, sync::Arc};
+use std::{sync::Arc};
 
 use crate::processors::base_processor::{Processor, ProcessorError};
-use std::any::{TypeId};
 
 pub struct RawImage {
     pub width: u32,
@@ -10,13 +9,15 @@ pub struct RawImage {
 }
 
 pub struct GreyScaleProcessor {
+    id: String,
     input: Option<Arc<RawImage>>,
     output: Option<Arc<RawImage>>
 }
 
 impl GreyScaleProcessor {
-    pub fn new() -> GreyScaleProcessor {
+    pub fn new(id: String) -> GreyScaleProcessor {
             GreyScaleProcessor {
+                id,
                 input: None,
                 output: None
             }
@@ -24,21 +25,30 @@ impl GreyScaleProcessor {
 }
 
 impl Processor for GreyScaleProcessor {
+    type Input = RawImage;
+    type Output = RawImage;
 
-    fn input_type(&self) -> TypeId {
-        TypeId::of::<RawImage>()
+    fn id(&self) -> &str {
+        &self.id
     }
 
-    fn output_type(&self) -> TypeId {
-        TypeId::of::<RawImage>()
+    fn set_input(&mut self, mut inputs: Vec<Arc<dyn std::any::Any + Send + Sync>>) -> Result<(), ProcessorError> {
+        if inputs.is_empty() {
+            return Err(ProcessorError::MissingInput(format!("Processor {} requires 1 input, got 0", self.id())));
+        }
+        
+        let first_input = inputs.remove(0);
+        
+        if let Ok(typed_image) = first_input.downcast::<RawImage>() {
+            self.input = Some(typed_image);
+            Ok(())
+        } else {
+            Err(ProcessorError::InvalidInput(format!("Invalid input type (expected RawImage) for processor {}", self.id())))
+        }
     }
 
-    fn set_input(&mut self, input: Arc<dyn Any + Send + Sync>) {
-        self.input = input.downcast::<RawImage>().ok();
-    }
-
-    fn get_output(&self) -> Option<Arc<dyn Any + Send + Sync>> {
-        self.output.clone().map(|o| o as Arc<dyn Any + Send + Sync>)
+    fn get_output(&self) -> Option<Arc<RawImage>> {
+        self.output.clone()
     }
 
     fn process(&mut self) -> Result<(), ProcessorError> {
@@ -63,7 +73,7 @@ impl Processor for GreyScaleProcessor {
     
             Ok(())
         } else {
-            Err(ProcessorError::MissingInput)
+            Err(ProcessorError::MissingInput(format!("Missing input for processor {}", self.id())))
         }
     }
 }

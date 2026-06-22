@@ -1,4 +1,4 @@
-use std::{any::{Any, TypeId}, sync::Arc};
+use std::{sync::Arc};
 
 use crate::processors::{base_processor::{Processor, ProcessorError}, greyscale_processor::RawImage};
 
@@ -6,31 +6,42 @@ use image::GenericImageView;
 
 pub struct ImageReaderProcessor {
     input: Option<Arc<String>>,
-    output: Option<Arc<RawImage>>
+    output: Option<Arc<RawImage>>,
+    id: String,
 }
 
 impl ImageReaderProcessor {
-    pub fn new() -> ImageReaderProcessor {
-        ImageReaderProcessor { input: None, output: None }
+    pub fn new(id: String) -> ImageReaderProcessor {
+        ImageReaderProcessor { input: None, output: None, id }
     }
 }
 
 impl Processor for ImageReaderProcessor {
+    type Input = String;
+    type Output = RawImage;
 
-    fn set_input(&mut self, input: Arc<dyn Any + Send + Sync>) {
-        self.input = input.downcast::<String>().ok();
+    fn id(&self) -> &str {
+        &self.id
     }
 
-    fn get_output(&self) -> Option<Arc<dyn Any + Send + Sync>> {
-        self.output.clone().map(|o| o as Arc<dyn Any + Send + Sync>)
+    fn set_input(&mut self, mut inputs: Vec<Arc<dyn std::any::Any + Send + Sync>>) -> Result<(), ProcessorError> {
+        if inputs.is_empty() {
+            return Err(ProcessorError::MissingInput(format!("Processor {} requires 1 input, got 0", self.id())));
+        }
+        
+        let first_input = inputs.remove(0);
+        
+        if let Ok(typed_input) = first_input.downcast::<String>() {
+            self.input = Some(typed_input);
+            Ok(())
+        } else {
+            Err(ProcessorError::InvalidInput(format!("Invalid input type (expected String) for processor {}", self.id())))
+        }
     }
 
-    fn input_type(&self) -> TypeId {
-        TypeId::of::<String>()
-    }
+    fn get_output(&self) -> Option<Arc<RawImage>> {
+        self.output.clone()
 
-    fn output_type(&self) -> TypeId {
-        TypeId::of::<RawImage>()
     }
 
     fn process(&mut self) -> Result<(), ProcessorError> {
@@ -49,7 +60,7 @@ impl Processor for ImageReaderProcessor {
             
             Ok(())
         } else {
-            Err(ProcessorError::MissingInput)
+            Err(ProcessorError::MissingInput(format!("Missing input for processor {}", self.id())))
         }
     }
 }
