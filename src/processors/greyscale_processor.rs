@@ -1,4 +1,4 @@
-use std::{any::Any, sync::Arc};
+use std::{sync::Arc};
 
 use crate::processors::base_processor::{Processor, ProcessorError};
 
@@ -27,15 +27,12 @@ impl Processor for GreyScaleProcessor {
     type Input = RawImage;
     type Output = RawImage;
 
-    const INPUT: Option<Arc<Self::Input>> = None;
-    const OUTPUT: Option<Arc<Self::Output>> = None;
-
-    fn set_input(&mut self, input: Arc<dyn Any + Send + Sync>) {
-        self.input = input.downcast::<RawImage>().ok();
+    fn set_input(&mut self, input: Arc<RawImage>) {
+        self.input = Some(input);
     }
 
-    fn get_output(&self) -> Option<Arc<dyn Any + Send + Sync>> {
-        self.output.clone().map(|o| o as Arc<dyn Any + Send + Sync>)
+    fn get_output(&self) -> Option<Arc<RawImage>> {
+        self.output.clone()
     }
 
     fn process(&mut self) -> Result<(), ProcessorError> {
