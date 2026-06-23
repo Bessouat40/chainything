@@ -6,11 +6,8 @@ use egui_snarl::{
 
 #[derive(Clone)]
 pub enum MyNode {
-    /// Nœud d'entrée qui contient le chemin ou l'URL de l'image
     String(String),
-    /// Représente ton ImageReaderProcessor
     ImageReader,
-    /// Un nœud optionnel pour afficher le résultat de l'image traitée
     ImageDisplay,
 }
 
@@ -27,22 +24,21 @@ impl SnarlViewer<MyNode> for MyGraphViewer {
 
     fn inputs(&mut self, node: &MyNode) -> usize {
         match node {
-            MyNode::String(_) => 0,       // Génère une string, ne prend rien en entrée
-            MyNode::ImageReader => 1,     // Prend 1 input : le chemin (String)
-            MyNode::ImageDisplay => 1,    // Prend 1 input : les données de l'image
+            MyNode::String(_) => 0,
+            MyNode::ImageReader => 1,
+            MyNode::ImageDisplay => 1,
         }
     }
 
     fn outputs(&mut self, node: &MyNode) -> usize {
         match node {
-            MyNode::String(_) => 1,       // Sort le chemin
-            MyNode::ImageReader => 1,     // Sort le RawImage (ou la structure correspondante)
-            MyNode::ImageDisplay => 0,    // Affiche juste le résultat
+            MyNode::String(_) => 1,
+            MyNode::ImageReader => 1,
+            MyNode::ImageDisplay => 0,
         }
     }
 
     fn show_input(&mut self, pin: &InPin, ui: &mut Ui, _snarl: &mut Snarl<MyNode>) -> PinInfo {
-        // Personnalisation des entrées selon le nœud
         match _snarl[pin.id.node] {
             MyNode::ImageReader => {
                 ui.label("Path (String)");
@@ -57,10 +53,8 @@ impl SnarlViewer<MyNode> for MyGraphViewer {
     }
 
     fn show_output(&mut self, pin: &OutPin, ui: &mut Ui, snarl: &mut Snarl<MyNode>) -> PinInfo {
-        // Personnalisation des sorties
         match snarl[pin.id.node] {
             MyNode::String(ref mut value) => {
-                // On permet à l'utilisateur d'éditer le chemin directement dans le nœud
                 ui.add(egui::TextEdit::singleline(value).desired_width(100.0));
                 PinInfo::circle().with_fill(egui::Color32::GREEN)
             }
