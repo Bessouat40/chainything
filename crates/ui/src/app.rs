@@ -22,7 +22,6 @@ enum Status {
 
 impl ChainythingApp {
     pub fn new(_cc: &eframe::CreationContext<'_>) -> Self {
-        // Look for nodes.toml next to the binary, then in the current dir
         let nodes_path = Self::find_nodes_toml();
         let defs = load_processor_defs(&nodes_path);
 
@@ -37,13 +36,11 @@ impl ChainythingApp {
     }
 
     fn find_nodes_toml() -> PathBuf {
-        // 1. next to the binary
         if let Ok(mut p) = std::env::current_exe() {
             p.pop();
             p.push("nodes.toml");
             if p.exists() { return p; }
         }
-        // 2. current working directory
         PathBuf::from("nodes.toml")
     }
 }
