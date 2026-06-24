@@ -25,7 +25,7 @@ impl BaseNode for ImageReaderNode {
         "ImageReaderNode"
     }
 
-    fn get_value(&self) -> Option<Vec<InputOutputType>> {
+    fn get_value(&self) -> Option<&Vec<InputOutputType>> {
         None
     }
 

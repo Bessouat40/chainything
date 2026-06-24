@@ -26,7 +26,7 @@ impl BaseNode for ImageDisplayNode {
         "ImageDisplayNode"
     }
 
-    fn get_value(&self) -> Option<Vec<InputOutputType>> {
+    fn get_value(&self) -> Option<&Vec<InputOutputType>> {
         None
     }
 
@@ -72,32 +72,40 @@ impl BaseNode for ImageDisplayNode {
         frame.fill(egui::Color32::from_rgb(70, 40, 40))
     }
 
-    // fn show_body(
-    //     &mut self,
-    //     node: NodeId,
-    //     inputs: &[InPin],
-    //     _outputs: &[OutPin],
-    //     ui: &mut Ui,
-    //     snarl: &mut Snarl<Box<dyn BaseNode>>,
-    // ) {
-    //     ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
-    //     ui.set_width(200.0);
-    //     let input = &inputs[0];
-    //     let url_to_display = match input.remotes.as_slice() {
-    //         [remote] => {
-    //                 Some(snarl[remote.node].string_in().clone())
-    //             }
-    //             _ => None,
-    //         };
+    fn show_body(
+        &self,
+        _node: NodeId,
+        inputs: &[InPin],
+        _outputs: &[OutPin],
+        ui: &mut Ui,
+        snarl: &Snarl<Box<dyn BaseNode>>,
+    ) {
+        ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
+            ui.set_width(200.0);
+            
+            let input = &inputs[0];
+            let url_to_display = match input.remotes.as_slice() {
+                [remote] => {
+                    let remote_node = &snarl[remote.node];
+                    
+                    if let Some(values) = remote_node.get_value() {
+                        if let Some(InputOutputType::String(uri)) = values.get(remote.output) {
+                            Some(uri.clone())
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    }
+                }
+                _ => None,
+            };
 
-    //         if let Some(uri) = url_to_display {
-    //             ui.add(
-    //                 egui::Image::new(&uri)
-    //                     .show_loading_spinner(true)
-    //             );
-    //         } else {
-    //             ui.label("No image to display");
-    //         }
-    //     });
-    // }
+            if let Some(uri) = url_to_display {
+                ui.add(egui::Image::new(&uri).show_loading_spinner(true));
+            } else {
+                ui.label("No image to display");
+            }
+        });
+    }
 }

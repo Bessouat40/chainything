@@ -71,36 +71,24 @@ impl SnarlViewer<Box<dyn BaseNode>> for DemoViewer {
         snarl[pin.id.node].show_output(pin, ui)
     }
 
-    // fn show_body(
-    //     &mut self,
-    //     node: NodeId,
-    //     inputs: &[InPin],
-    //     _outputs: &[OutPin],
-    //     ui: &mut Ui,
-    //     snarl: &mut Snarl<Box<dyn BaseNode>>,
-    // ) {
-    //     if let MyNode::ImageDisplay(_) = snarl[node] {
-    //         ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
-    //             ui.set_width(200.0);
-    //             let input = &inputs[0];
-    //             let url_to_display = match input.remotes.as_slice() {
-    //                 [remote] => {
-    //                     Some(snarl[remote.node].string_in().clone())
-    //                 }
-    //                 _ => None,
-    //             };
+    #[inline]
+    fn has_body(&mut self, node: &Box<dyn BaseNode>) -> bool {
+        node.has_body()
+    }
 
-    //             if let Some(uri) = url_to_display {
-    //                 ui.add(
-    //                     egui::Image::new(&uri)
-    //                         .show_loading_spinner(true)
-    //                 );
-    //             } else {
-    //                 ui.label("No image to display");
-    //             }
-    //         });
-    //     }
-    // }
+    fn show_body(
+        &mut self,
+        node: NodeId,
+        inputs: &[InPin],
+        outputs: &[OutPin],
+        ui: &mut Ui,
+        snarl: &mut Snarl<Box<dyn BaseNode>>,
+    ) {
+        let snarl_ref = &*snarl;
+        let base_node = &snarl_ref[node];
+        
+        base_node.show_body(node, inputs, outputs, ui, snarl_ref);
+    }
 
     fn has_graph_menu(&mut self, _pos: egui::Pos2, _snarl: &mut Snarl<Box<dyn BaseNode>>) -> bool {
         true

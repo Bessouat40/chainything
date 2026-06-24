@@ -29,8 +29,8 @@ impl BaseNode for TextInputNode {
         "TextInputNode"
     }
 
-    fn get_value(&self) -> Option<Vec<InputOutputType>> {
-        None
+    fn get_value(&self) -> Option<&Vec<InputOutputType>> {
+        Some(&self.value)
     }
 
     fn inputs_count(&self) -> usize {
