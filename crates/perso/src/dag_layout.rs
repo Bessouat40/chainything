@@ -1,10 +1,10 @@
 use egui::Ui;
 use egui_snarl::{ui::SnarlWidget, InPinId, OutPinId, Snarl}; 
-use crate::nodes::node::MyNode;
+use crate::nodes::node_registry::NodeRegistry;
 use crate::nodes::viewer::DemoViewer;
 
 pub struct DAGLayout {
-    snarl: Snarl<MyNode>,
+    snarl: Snarl<NodeRegistry>,
     viewer: DemoViewer,
 }
 
@@ -17,34 +17,35 @@ impl Default for DAGLayout {
 impl DAGLayout {
     pub fn new() -> Self {
         let mut snarl = Snarl::new();
+        let demo_viewer = DemoViewer::new();
 
-        snarl.insert_node(
-            egui::pos2(100.0, 150.0), 
-            MyNode::TextInputProcessor("C:/images/test.png".to_string())
-        );
+        // snarl.insert_node(
+        //     egui::pos2(100.0, 150.0), 
+        //     demo_viewer.node_registry.get_node().unwrap()
+        // );
         // let n_path = snarl.insert_node(
         //     egui::pos2(100.0, 150.0), 
-        //     MyNode::TextInputProcessor("C:/images/test.png".to_string())
+        //     NodeRegistry::TextInputProcessor("C:/images/test.png".to_string())
         // );
 
-        snarl.insert_node(
-            egui::pos2(400.0, 150.0), 
-            MyNode::ImageReaderProcessor(String::new())
-        );
+        // snarl.insert_node(
+        //     egui::pos2(400.0, 150.0), 
+        //     NodeRegistry::ImageReaderProcessor(String::new())
+        // );
 
         // let n_reader = snarl.insert_node(
         //     egui::pos2(400.0, 150.0), 
-        //     MyNode::ImageReaderProcessor(String::new())
+        //     NodeRegistry::ImageReaderProcessor(String::new())
         // );
 
-        snarl.insert_node(
-            egui::pos2(700.0, 150.0), 
-            MyNode::ImageDisplay(String::new())
-        );
+        // snarl.insert_node(
+        //     egui::pos2(700.0, 150.0), 
+        //     NodeRegistry::ImageDisplay(String::new())
+        // );
 
         // let n_display = snarl.insert_node(
         //     egui::pos2(700.0, 150.0), 
-        //     MyNode::ImageDisplay(String::new())
+        //     NodeRegistry::ImageDisplay(String::new())
         // );
 
         // snarl.connect(
@@ -56,14 +57,15 @@ impl DAGLayout {
         //     OutPinId { node: n_reader, output: 0 }, 
         //     InPinId { node: n_display, input: 0 }
         // );
-
         Self {
             snarl,
-            viewer: DemoViewer,
+            viewer: demo_viewer,
         }
     }
 
     pub fn show(&mut self, ui: &mut Ui) {
-        SnarlWidget::new().show(&mut self.snarl, &mut self.viewer, ui);
+        let snarl: &mut Snarl<Box<dyn crate::nodes::base_node::BaseNode>> = 
+            unsafe { std::mem::transmute(&mut self.snarl) };
+        SnarlWidget::new().show(snarl, &mut self.viewer, ui);
     }
 }
