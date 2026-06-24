@@ -11,6 +11,7 @@ use egui_snarl::{
     },
 };
 
+#[derive(Clone)]
 pub struct ImageReaderNode;
 
 impl ImageReaderNode {
@@ -22,6 +23,10 @@ impl ImageReaderNode {
 impl BaseNode for ImageReaderNode {
     fn name(&self) -> &str {
         "ImageReaderNode"
+    }
+
+    fn get_value(&self) -> Option<Vec<InputOutputType>> {
+        None
     }
 
     fn inputs_count(&self) -> usize {

@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use dyn_clone::DynClone;
 
 use chainything::processors::greyscale_processor::RawImage;
 use egui::{Color32, Ui};
@@ -12,6 +13,7 @@ use egui_snarl::{
 
 pub const STRING_COLOR: Color32 = Color32::from_rgb(0x00, 0xb0, 0x00);
 
+#[derive(Clone)]
 pub enum InputOutputType {
     String(String),
     RawImage(Option<RawImage>),
@@ -26,7 +28,7 @@ impl InputOutputType {
     }
 }
 
-pub trait BaseNode {
+pub trait BaseNode: DynClone {
     fn name(&self) -> &str;
     fn inputs_count(&self) -> usize;
     fn outputs_count(&self) -> usize;
@@ -35,6 +37,7 @@ pub trait BaseNode {
     fn show_input(&mut self, pin: &InPin, ui: &mut Ui) -> PinInfo;
     fn show_output(&mut self, pin: &OutPin, ui: &mut Ui) -> PinInfo;
     fn has_body(&self) -> bool;
+    fn get_value(&self) -> Option<Vec<InputOutputType>>;
     fn header_frame(&self, frame: egui::Frame) -> egui::Frame;
     // fn show_body(
     //     &mut self,
@@ -45,3 +48,5 @@ pub trait BaseNode {
     //     snarl: &mut Snarl<Box<dyn BaseNode>>,
     // );
 }
+
+dyn_clone::clone_trait_object!(BaseNode);

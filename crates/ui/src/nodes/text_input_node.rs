@@ -13,13 +13,13 @@ use egui_snarl::{
 
 #[derive(Clone)]
 pub struct TextInputNode{
-    value: String,
+    value: Vec<InputOutputType>,
 }
 
 impl TextInputNode {
     pub fn new() -> Self {
         Self {
-            value: String::new(),
+            value: vec![InputOutputType::String("".to_string())],
         }
     }
 }
@@ -27,6 +27,10 @@ impl TextInputNode {
 impl BaseNode for TextInputNode {
     fn name(&self) -> &str {
         "TextInputNode"
+    }
+
+    fn get_value(&self) -> Option<Vec<InputOutputType>> {
+        None
     }
 
     fn inputs_count(&self) -> usize {
@@ -51,17 +55,19 @@ impl BaseNode for TextInputNode {
     }
 
     fn show_output(&mut self, pin: &OutPin, ui: &mut Ui) -> PinInfo {
-        assert_eq!(pin.id.output, 0, "TextInputProcessor node has only one output");
+        assert_eq!(pin.id.output, 0, "TextInputNode a seulement une sortie");
 
         ui.with_layout(egui::Layout::top_down(egui::Align::Max), |ui| {
-            ui.label("Output String:");
+            ui.label("Valeur :");
             
-            let edit = egui::TextEdit::singleline(&mut self.value)
-                .text_color(STRING_COLOR)
-                .desired_width(120.0) 
-                .font(egui::TextStyle::Monospace);
-            
-            ui.add(edit);
+            if let InputOutputType::String(ref mut val) = self.value[0] {
+                ui.add(
+                    egui::TextEdit::singleline(val)
+                        .text_color(STRING_COLOR)
+                        .desired_width(120.0)
+                        .font(egui::TextStyle::Monospace)
+                );
+            }
         });
 
         PinInfo::circle()

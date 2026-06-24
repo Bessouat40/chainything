@@ -12,6 +12,7 @@ use egui_snarl::{
 };
 
 
+#[derive(Clone)]
 pub struct ImageDisplayNode;
 
 impl ImageDisplayNode {
@@ -25,6 +26,10 @@ impl BaseNode for ImageDisplayNode {
         "ImageDisplayNode"
     }
 
+    fn get_value(&self) -> Option<Vec<InputOutputType>> {
+        None
+    }
+
     fn inputs_count(&self) -> usize {
         1
     }
@@ -34,7 +39,7 @@ impl BaseNode for ImageDisplayNode {
     }
 
     fn mapping_input(&self) -> Option<HashMap<usize, InputOutputType>> {
-        Some(HashMap::from([(0, InputOutputType::RawImage(None))]))
+        Some(HashMap::from([(0, InputOutputType::String("".to_string()))]))
     }
 
     fn mapping_output(&self) -> Option<HashMap<usize, InputOutputType>> {
