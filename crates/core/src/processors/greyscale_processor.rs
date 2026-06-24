@@ -2,6 +2,7 @@ use std::{sync::Arc};
 
 use crate::processors::base_processor::{Processor, ProcessorError};
 
+#[derive(Clone)]
 pub struct RawImage {
     pub width: u32,
     pub height: u32,

@@ -1,74 +1,33 @@
-use egui::Ui;
-use egui_snarl::{
-    InPin, OutPin, Snarl,
-    ui::{PinInfo, SnarlViewer},
-};
+use chainything::processors::greyscale_processor::RawImage;
 
 #[derive(Clone)]
 pub enum MyNode {
-    /// Nœud d'entrée qui contient le chemin ou l'URL de l'image
-    String(String),
-    /// Représente ton ImageReaderProcessor
-    ImageReader,
-    /// Un nœud optionnel pour afficher le résultat de l'image traitée
-    ImageDisplay,
+    TextInputProcessor(String),
+    ImageReaderProcessor(String),
+    ImageDisplay(String),
 }
-
-pub struct MyGraphViewer;
-
-impl SnarlViewer<MyNode> for MyGraphViewer {
-    fn title(&mut self, node: &MyNode) -> String {
-        match node {
-            MyNode::String(_) => "Chemin de l'image".to_owned(),
-            MyNode::ImageReader => "Processeur : Image Reader".to_owned(),
-            MyNode::ImageDisplay => "Affichage Image".to_owned(),
+impl MyNode {
+    const fn _name(&self) -> &str {
+        match self {
+            MyNode::ImageReaderProcessor(_) => "ImageReaderProcessor",
+            MyNode::TextInputProcessor(_) => "TextInputProcessor",
+            MyNode::ImageDisplay(_) => "ImageDisplay",
         }
     }
 
-    fn inputs(&mut self, node: &MyNode) -> usize {
-        match node {
-            MyNode::String(_) => 0,       // Génère une string, ne prend rien en entrée
-            MyNode::ImageReader => 1,     // Prend 1 input : le chemin (String)
-            MyNode::ImageDisplay => 1,    // Prend 1 input : les données de l'image
+    pub fn string_in(&self) -> &String {
+        match self {
+            MyNode::ImageReaderProcessor(value) => value,
+            MyNode::TextInputProcessor(value) => value,
+            MyNode::ImageDisplay(value) => value,
         }
     }
 
-    fn outputs(&mut self, node: &MyNode) -> usize {
-        match node {
-            MyNode::String(_) => 1,       // Sort le chemin
-            MyNode::ImageReader => 1,     // Sort le RawImage (ou la structure correspondante)
-            MyNode::ImageDisplay => 0,    // Affiche juste le résultat
+    pub fn _image_out(&self) -> Option<&RawImage> {
+        match self {
+            MyNode::ImageReaderProcessor(_) => None,
+            _ => None,
         }
     }
 
-    fn show_input(&mut self, pin: &InPin, ui: &mut Ui, _snarl: &mut Snarl<MyNode>) -> PinInfo {
-        // Personnalisation des entrées selon le nœud
-        match _snarl[pin.id.node] {
-            MyNode::ImageReader => {
-                ui.label("Path (String)");
-                PinInfo::circle().with_fill(egui::Color32::GREEN)
-            }
-            MyNode::ImageDisplay => {
-                ui.label("RawImage");
-                PinInfo::circle().with_fill(egui::Color32::LIGHT_BLUE)
-            }
-            _ => PinInfo::circle().with_fill(egui::Color32::GRAY),
-        }
-    }
-
-    fn show_output(&mut self, pin: &OutPin, ui: &mut Ui, snarl: &mut Snarl<MyNode>) -> PinInfo {
-        // Personnalisation des sorties
-        match snarl[pin.id.node] {
-            MyNode::String(ref mut value) => {
-                // On permet à l'utilisateur d'éditer le chemin directement dans le nœud
-                ui.add(egui::TextEdit::singleline(value).desired_width(100.0));
-                PinInfo::circle().with_fill(egui::Color32::GREEN)
-            }
-            MyNode::ImageReader => {
-                ui.label("RawImage Out");
-                PinInfo::circle().with_fill(egui::Color32::LIGHT_BLUE)
-            }
-            _ => PinInfo::circle().with_fill(egui::Color32::GRAY),
-        }
-    }
 }
