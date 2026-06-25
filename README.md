@@ -1,7 +1,7 @@
 # Chainything
 
-[![Crates.io](https://img.shields.io/crates/v/chainything.svg)](https://crates.io/crates/chainything)
-[![docs.rs](https://docs.rs/chainything/badge.svg)](https://docs.rs/chainything)
+[![Crates.io-chainything](https://img.shields.io/crates/v/chainything.svg)](https://crates.io/crates/chainything)
+[![Crates.io-chainything-ui](https://img.shields.io/crates/v/chainything-ui.svg)](https://crates.io/crates/chainything-ui)
 [![ci](https://github.com/Bessouat40/chainything/actions/workflows/ci.yml/badge.svg)](https://github.com/Bessouat40/chainything/actions)
 
 ![Chainything UI](./media/ui.png)
