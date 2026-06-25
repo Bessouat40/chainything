@@ -17,7 +17,7 @@ These types are commonly used across processors and should be reused when compat
 - **`RawImage`** — RGB or greyscale image representation
   - Fields: `width: u32`, `height: u32`, `pixels: Vec<u8>` (flat row-major buffer)
   - Use this when your processor works with image data
-  - Defined in `crates/core/src/processors/greyscale_processor.rs`
+  - Defined in `crates/chainything/src/processors/greyscale_processor.rs`
 
 - **`String`** — File paths or text data
   - Use for file paths, identifiers, or text inputs
@@ -49,7 +49,7 @@ If existing types don't fit your processor's needs:
 1. **Define the type** in a new module or reuse an existing module (e.g., add to `greyscale_processor.rs` if image-related)
 2. **Make it `Clone + Send + Sync + 'static`** so it can be wrapped in `Arc` and type-erased
 3. **Document it thoroughly** with doc comments explaining its purpose and fields
-4. **Add it to `crates/core/src/processors.rs`** if it's meant to be shared (public export)
+4. **Add it to `crates/chainything/src/processors.rs`** if it's meant to be shared (public export)
 
 **Example: Adding a new type**
 
@@ -64,7 +64,7 @@ pub struct Histogram {
 
 ## Step 1: Create Your Processor
 
-Create a new file in `crates/core/src/processors/` following the naming convention: `your_processor_name.rs`.
+Create a new file in `crates/chainything/src/processors/` following the naming convention: `your_processor_name.rs`.
 
 ### Processor Structure
 
@@ -79,7 +79,7 @@ A processor must:
 
 ## Step 2: Register Your Processor
 
-Add your processor to the registry in `crates/core/src/pipeline/registry.rs`:
+Add your processor to the registry in `crates/chainything/src/pipeline/registry.rs`:
 
 1. **Import your processor** at the top of the file:
 
@@ -97,7 +97,7 @@ registry.register("YourProcessorName", |id| {
 
 ## Step 3: Export Your Processor
 
-Add your processor to the public exports in `crates/core/src/processors.rs`:
+Add your processor to the public exports in `crates/chainything/src/processors.rs`:
 
 ```rust
 pub mod your_processor_name;
@@ -118,7 +118,7 @@ pub mod blur_processor;
 - ✅ Wrong type: processor fails when input types don't match expectations
 - ✅ Edge cases: empty images, single pixels, etc.
 
-See the examples in `crates/core/src/processors/greyscale_processor.rs` for complete test patterns.
+See the examples in `crates/chainything/src/processors/greyscale_processor.rs` for complete test patterns.
 
 ## Step 5: Add Documentation
 
@@ -151,10 +151,10 @@ cargo test
 
 ## Complete Checklist
 
-- [ ] Created processor file in `crates/core/src/processors/`
+- [ ] Created processor file in `crates/chainything/src/processors/`
 - [ ] Processor implements the `Processor` trait correctly
-- [ ] Processor is registered in `crates/core/src/pipeline/registry.rs`
-- [ ] Processor is exported in `crates/core/src/processors.rs`
+- [ ] Processor is registered in `crates/chainything/src/pipeline/registry.rs`
+- [ ] Processor is exported in `crates/chainything/src/processors.rs`
 - [ ] Added comprehensive documentation comments
 - [ ] Added tests covering happy path and error cases
 - [ ] Ran `cargo fmt` to format code
@@ -178,7 +178,7 @@ A node represents a processor (or a source/sink) in the visual DAG editor. Each 
 
 ## Step 1: Add Input/Output Types (if needed)
 
-All input and output types are defined in `crates/ui/src/nodes/base_node.rs` in the `InputOutputType` enum.
+All input and output types are defined in `crates/chainything-ui/src/nodes/base_node.rs` in the `InputOutputType` enum.
 
 ### Existing Types
 
@@ -212,7 +212,7 @@ impl InputOutputType {
 
 ## Step 2: Create Your Node
 
-Create a new file in `crates/ui/src/nodes/` named `your_processor_name_node.rs`.
+Create a new file in `crates/chainything-ui/src/nodes/` named `your_processor_name_node.rs`.
 
 ### Key Implementation Notes
 
@@ -224,7 +224,7 @@ Create a new file in `crates/ui/src/nodes/` named `your_processor_name_node.rs`.
 
 ## Step 3: Export Your Node
 
-Add your node to `crates/ui/src/nodes.rs`:
+Add your node to `crates/chainything-ui/src/nodes.rs`:
 
 ```rust
 pub mod your_processor_name_node;
@@ -232,7 +232,7 @@ pub mod your_processor_name_node;
 
 ## Step 4: Register Your Node
 
-Add your node to `crates/ui/src/nodes/node_registry.rs`:
+Add your node to `crates/chainything-ui/src/nodes/node_registry.rs`:
 
 1. **Import your node** at the top:
 
@@ -273,20 +273,20 @@ cargo fmt
 ## Complete UI Checklist
 
 - [ ] Created new type in `InputOutputType` (if needed)
-- [ ] Created node file in `crates/ui/src/nodes/`
+- [ ] Created node file in `crates/chainything-ui/src/nodes/`
 - [ ] Node implements `BaseNode` trait correctly
 - [ ] Input/output types match processor expectations
-- [ ] Node exported in `crates/ui/src/nodes.rs`
-- [ ] Node registered in `crates/ui/src/nodes/node_registry.rs`
+- [ ] Node exported in `crates/chainything-ui/src/nodes.rs`
+- [ ] Node registered in `crates/chainything-ui/src/nodes/node_registry.rs`
 - [ ] `name()` matches processor registry name
 - [ ] UI pins render correctly (test manually in the app)
 - [ ] Ran `cargo fmt`
 
 ## Full Contribution Workflow
 
-1. **Create processor** in `crates/core/src/processors/` (library contribution steps 1-7)
+1. **Create processor** in `crates/chainything/src/processors/` (library contribution steps 1-7)
 2. **Register processor** in core registry
-3. **Create node** in `crates/ui/src/nodes/`
+3. **Create node** in `crates/chainything-ui/src/nodes/`
 4. **Register node** in UI registry
 5. **Test end-to-end:** Load the UI, verify the node appears in the palette and works correctly
 6. **Submit PR** with both core and UI changes

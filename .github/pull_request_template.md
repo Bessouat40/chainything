@@ -15,21 +15,21 @@ Please include a summary of the changes and why they're being made.
 
 ### Library Changes (`crates/core`)
 
-- [ ] Created processor file in `crates/core/src/processors/`
+- [ ] Created processor file in `crates/chainything/src/processors/`
 - [ ] Processor implements the `Processor` trait correctly
-- [ ] Processor is registered in `crates/core/src/pipeline/registry.rs`
-- [ ] Processor is exported in `crates/core/src/processors.rs`
+- [ ] Processor is registered in `crates/chainything/src/pipeline/registry.rs`
+- [ ] Processor is exported in `crates/chainything/src/processors.rs`
 - [ ] Added comprehensive documentation comments
 - [ ] Added tests covering happy path and error cases
 
 ### UI Changes (`crates/ui`)
 
 - [ ] Created new type in `InputOutputType` (if needed)
-- [ ] Created node file in `crates/ui/src/nodes/`
+- [ ] Created node file in `crates/chainything-ui/src/nodes/`
 - [ ] Node implements `BaseNode` trait correctly
 - [ ] Input/output types match processor expectations
-- [ ] Node exported in `crates/ui/src/nodes.rs`
-- [ ] Node registered in `crates/ui/src/nodes/node_registry.rs`
+- [ ] Node exported in `crates/chainything-ui/src/nodes.rs`
+- [ ] Node registered in `crates/chainything-ui/src/nodes/node_registry.rs`
 - [ ] UI pins render correctly (tested manually)
 
 ### Code Quality
