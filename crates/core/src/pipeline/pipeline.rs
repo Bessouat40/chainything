@@ -5,6 +5,8 @@ use std::{
     sync::Arc,
 };
 
+/// Represents errors that can occur during pipeline planning or execution.
+#[derive(Debug)]
 pub enum PipelineErrors {
     UnknownProcessor(String),
     UnknownInputProcessor(String),
@@ -22,8 +24,11 @@ impl From<ProcessorError> for PipelineErrors {
     }
 }
 
+/// Defines the origin of data for a processor's input slot.
 pub enum InputSource {
+    /// Data sourced from another processor within the same pipeline.
     Connection { node_id: String, output_slot: usize },
+    /// Data provided directly as a static value.
     Static(Arc<dyn Any + Send + Sync>),
 }
 
@@ -45,6 +50,7 @@ pub struct NodeConfig {
     pub inputs: Vec<InputSource>,
 }
 
+/// Manages a collection of processors and orchestrates their execution order based on dependencies.
 pub struct Pipeline {
     processors: HashMap<String, Box<dyn ProcessorBase>>,
     connections: Vec<NodeConfig>,
@@ -58,12 +64,22 @@ impl Pipeline {
         }
     }
 
+    /// Adds a processor to the pipeline and defines its input sources.
+    ///
+    /// # Arguments
+    /// * `processor` - The processor implementation to be added.
+    /// * `inputs` - A list of `InputSource` matching the expected input slots of the processor.
     pub fn add_processor(&mut self, processor: Box<dyn ProcessorBase>, inputs: Vec<InputSource>) {
         let id = processor.id().to_string();
         self.processors.insert(id.clone(), processor);
         self.connections.push(NodeConfig { id, inputs });
     }
 
+    /// Performs a topological sort to determine the valid execution sequence of processors.
+    ///
+    /// # Returns
+    /// * `Ok(Vec<String>)` - A list of processor IDs in correct execution order.
+    /// * `Err(PipelineErrors)` - If a cycle is detected or an unknown processor is referenced.
     pub fn plan(&self) -> Result<Vec<String>, PipelineErrors> {
         let mut in_degree: HashMap<String, usize> = HashMap::new();
         let mut adj_list: HashMap<String, Vec<String>> = HashMap::new();
@@ -137,6 +153,14 @@ impl Pipeline {
         Ok(ordered_plan)
     }
 
+    /// Executes all processors in the pipeline based on the topological plan.
+    /// 
+    /// This method resolves input dependencies for each processor and triggers 
+    /// the `process()` logic sequentially.
+    ///
+    /// # Errors
+    /// * Returns `PipelineErrors` if planning fails, an input is missing, 
+    ///   or a processor returns an error during execution.
     pub fn execute(&mut self) -> Result<(), PipelineErrors> {
         let execution_order = self.plan()?;
 
@@ -190,10 +214,62 @@ impl Pipeline {
         Ok(())
     }
 
+    /// Retrieves configuration for a specific node ID.
     fn get_node_config(&self, id: &str) -> Result<&NodeConfig, PipelineErrors> {
         self.connections
             .iter()
             .find(|c| c.id == id)
             .ok_or(PipelineErrors::UnknownProcessor(id.to_string()))
+    }
+}
+
+struct _MockProcessor {
+    id: String,
+}
+
+impl ProcessorBase for _MockProcessor {
+    fn id(&self) -> &str { &self.id }
+    fn process(&mut self) -> Result<(), ProcessorError> { Ok(()) }
+    fn get_output_erased(&self) -> Vec<Arc<dyn Any + Send + Sync>> { vec![] }
+    fn set_input_erased(&mut self, _inputs: Vec<Arc<dyn Any + Send + Sync>>) -> Result<(), ProcessorError> { Ok(()) }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_topological_sort_valid() {
+        let mut pipeline = Pipeline::new();
+        
+        // A -> B -> C
+        pipeline.add_processor(Box::new(_MockProcessor { id: "C".into() }), vec![InputSource::connection("B", 0)]);
+        pipeline.add_processor(Box::new(_MockProcessor { id: "A".into() }), vec![]);
+        pipeline.add_processor(Box::new(_MockProcessor { id: "B".into() }), vec![InputSource::connection("A", 0)]);
+
+        let plan = pipeline.plan().unwrap();
+        assert_eq!(plan, vec!["A", "B", "C"]);
+    }
+
+    #[test]
+    fn test_cycle_detection() {
+        let mut pipeline = Pipeline::new();
+        
+        // A -> B -> A
+        pipeline.add_processor(Box::new(_MockProcessor { id: "A".into() }), vec![InputSource::connection("B", 0)]);
+        pipeline.add_processor(Box::new(_MockProcessor { id: "B".into() }), vec![InputSource::connection("A", 0)]);
+
+        let result = pipeline.plan();
+        assert!(matches!(result, Err(PipelineErrors::ComputingError(_))));
+    }
+
+    #[test]
+    fn test_unknown_processor_reference() {
+        let mut pipeline = Pipeline::new();
+        
+        pipeline.add_processor(Box::new(_MockProcessor { id: "C".into() }), vec![InputSource::connection("A", 0)]);
+
+        let result = pipeline.plan();
+        assert!(matches!(result, Err(PipelineErrors::UnknownProcessor(_))));
     }
 }

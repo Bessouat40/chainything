@@ -6,7 +6,6 @@ fn main() {
             {
             "id": "reader",
             "type": "ImageReader",
-            "parameters": {},
             "inputs": [
                 {
                 "value": "./chat.jpg"
@@ -16,7 +15,6 @@ fn main() {
             {
             "id": "greyscale",
             "type": "Greyscale",
-            "parameters": {},
             "inputs": [
                 {
                 "source_node": "reader",
@@ -27,7 +25,6 @@ fn main() {
             {
             "id": "saver",
             "type": "ImageSave",
-            "parameters": {},
             "inputs": [
                 {
                 "source_node": "greyscale",

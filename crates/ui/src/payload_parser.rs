@@ -10,7 +10,6 @@ pub struct NodePayload {
     pub id: String,
     #[serde(rename = "type")]
     pub node_type: String,
-    pub parameters: serde_json::Value,
     pub inputs: Vec<InputPayload>,
 }
 

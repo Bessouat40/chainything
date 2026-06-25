@@ -94,7 +94,6 @@ pub fn generate_payload(snarl: &Snarl<Box<dyn BaseNode>>) -> GraphPayload {
         payload.nodes.push(NodePayload {
             id: current_node_str_id,
             node_type: node.name().replace("Node", ""),
-            parameters: serde_json::json!({}),
             inputs: inputs_payload,
         });
     }
