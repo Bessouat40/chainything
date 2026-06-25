@@ -4,6 +4,19 @@ use crate::processors::{
 };
 use std::{any::Any, sync::Arc};
 
+/// The `ImageSaveProcessor` saves a `RawImage` to the filesystem.
+///
+/// ### Input
+/// * Expects two inputs: 
+///   1. `Arc<RawImage>` (the image data).
+///   2. `Arc<String>` (the file path to save to).
+///
+/// ### Output
+/// * Returns an empty vector (no data output).
+///
+/// ### Errors
+/// * Returns `ProcessorError::MissingInput` if inputs are not provided.
+/// * Returns `ProcessorError::InvalidInput` if types are mismatched.
 pub struct ImageSaveProcessor {
     id: String,
     input: Option<Arc<RawImage>>,
@@ -29,35 +42,25 @@ impl Processor for ImageSaveProcessor {
         &mut self,
         mut inputs: Vec<Arc<dyn Any + Send + Sync>>,
     ) -> Result<(), ProcessorError> {
-        if inputs.is_empty() {
+        if inputs.len() < 2 {
             return Err(ProcessorError::MissingInput(format!(
-                "Processor {} requires 2 inputs (RawImage, path), got 0",
-                self.id()
+                "Processor {} requires 2 inputs (RawImage, path), got {}",
+                self.id(), inputs.len()
             )));
         }
 
-        let first_input = inputs.remove(0);
+        let first = inputs.remove(0);
+        let second = inputs.remove(0);
 
-        if let Ok(typed_image) = first_input.downcast::<RawImage>() {
-            self.input = Some(typed_image);
+        self.input = Some(first.downcast::<RawImage>().map_err(|_| {
+            ProcessorError::InvalidInput("First input must be RawImage".to_string())
+        })?);
 
-            let second_input = inputs.remove(0);
+        self.output_path = Some(second.downcast::<String>().map_err(|_| {
+            ProcessorError::InvalidInput("Second input must be String".to_string())
+        })?);
 
-            if let Ok(typed_path) = second_input.downcast::<String>() {
-                self.output_path = Some(typed_path);
-                Ok(())
-            } else {
-                Err(ProcessorError::InvalidInput(format!(
-                    "Invalid second input type (expected String) for processor {}",
-                    self.id()
-                )))
-            }
-        } else {
-            Err(ProcessorError::InvalidInput(format!(
-                "Invalid input type (expected RawImage) for processor {}",
-                self.id()
-            )))
-        }
+        Ok(())
     }
 
     fn get_output(&self) -> Vec<Arc<dyn Any + Send + Sync>> {
@@ -66,28 +69,46 @@ impl Processor for ImageSaveProcessor {
 
     fn process(&mut self) -> Result<(), ProcessorError> {
         let input = self.input.as_ref().ok_or_else(|| {
-            ProcessorError::MissingInput(format!(
-                "No input provided before running process on {}",
-                self.id()
-            ))
+            ProcessorError::MissingInput("Missing image input".to_string())
         })?;
 
         let output_path = self.output_path.as_ref().ok_or_else(|| {
-            ProcessorError::MissingInput(format!(
-                "No output path provided before running process on {}",
-                self.id()
-            ))
+            ProcessorError::MissingInput("Missing output path".to_string())
         })?;
 
         image::save_buffer(
-            &output_path.as_ref(),
+            output_path.as_str(),
             &input.pixels,
             input.width,
             input.height,
             image::ColorType::L8,
         )
-        .expect("An error occured trying to save your image...");
+        .map_err(|e| ProcessorError::ComputingError(e.to_string()))?;
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_missing_inputs_fails() {
+        let mut processor = ImageSaveProcessor::new("save_test".to_string());
+        assert!(processor.set_input(vec![]).is_err());
+    }
+
+    #[test]
+    fn test_invalid_input_types_fails() {
+        let mut processor = ImageSaveProcessor::new("save_test".to_string());
+        let inputs: Vec<Arc<dyn Any + Send + Sync>> = vec![Arc::new("path".to_string()), Arc::new(10)];
+        assert!(processor.set_input(inputs).is_err());
+    }
+
+    #[test]
+    fn test_process_without_input_fails() {
+        let mut processor = ImageSaveProcessor::new("save_test".to_string());
+        assert!(processor.process().is_err());
     }
 }

@@ -1,12 +1,17 @@
 use std::sync::Arc;
-
+use image::GenericImageView;
 use crate::processors::{
     base_processor::{Processor, ProcessorError},
     greyscale_processor::RawImage,
 };
 
-use image::GenericImageView;
-
+/// The `ImageReaderProcessor` loads an image file from the filesystem.
+///
+/// ### Input
+/// * Expects a single `Arc<String>` representing the path to the image file.
+///
+/// ### Output
+/// * Produces an `Arc<RawImage>` containing the image dimensions and RGB pixel data.
 pub struct ImageReaderProcessor {
     input: Option<Arc<String>>,
     output: Option<Arc<RawImage>>,
@@ -82,5 +87,32 @@ impl Processor for ImageReaderProcessor {
                 self.id()
             )))
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_process_missing_input_fails() {
+        let mut processor = ImageReaderProcessor::new("test".to_string());
+        assert!(processor.process().is_err());
+    }
+
+    #[test]
+    fn test_invalid_input_type_fails() {
+        let mut processor = ImageReaderProcessor::new("test".to_string());
+        let inputs: Vec<Arc<dyn std::any::Any + Send + Sync>> = vec![Arc::new(123)];
+        assert!(processor.set_input(inputs).is_err());
+    }
+
+    #[test]
+    fn test_file_not_found_fails() {
+        let mut processor = ImageReaderProcessor::new("test".to_string());
+        let inputs: Vec<Arc<dyn std::any::Any + Send + Sync>> = vec![Arc::new("non_existent.jpg".to_string())];
+        
+        processor.set_input(inputs).unwrap();
+        assert!(processor.process().is_err());
     }
 }
