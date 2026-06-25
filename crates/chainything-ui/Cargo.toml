@@ -2,6 +2,12 @@
 name = "chainything-ui"
 version = "0.1.0"
 edition = "2024"
+description = "Visual node editor for Chainything DAG pipeline engine"
+license = "MIT"
+repository = "https://github.com/Bessouat40/chainything"
+readme = "README.md"
+keywords = ["dag", "pipeline", "workflow", "ui", "egui"]
+categories = ["development-tools", "graphics"]
 
 [dependencies]
 chainything = { version = "0.1.0", path = "../chainything" }

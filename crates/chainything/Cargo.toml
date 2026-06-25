@@ -2,6 +2,12 @@
 name = "chainything"
 version = "0.1.0"
 edition = "2024"
+description = "A Rust-based DAG pipeline execution engine with strong typing and automatic topological sorting"
+license = "MIT"
+repository = "https://github.com/Bessouat40/chainything"
+readme = "README.md"
+keywords = ["dag", "pipeline", "workflow", "processor"]
+categories = ["development-tools"]
 
 [dependencies]
 image = "0.25.10"
