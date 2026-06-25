@@ -1,12 +1,13 @@
 use std::collections::HashMap;
 
+
 use crate::nodes::base_node::{BaseNode, InputOutputType, STRING_COLOR};
 
-use egui::{Color32, Image, Ui};
+use egui::{Ui};
 use egui_snarl::{
-    InPin, InPinId, NodeId, OutPin, OutPinId, Snarl,
+    InPin, NodeId, OutPin, Snarl,
     ui::{
-        AnyPins, PinInfo, SnarlViewer,
+        PinInfo,
         WireStyle,
     },
 };
@@ -46,7 +47,7 @@ impl BaseNode for ImageDisplayNode {
         None
     }
 
-    fn show_input(&mut self, pin: &InPin, ui: &mut Ui) -> PinInfo {
+    fn show_input(&mut self, _pin: &InPin, ui: &mut Ui) -> PinInfo {
         ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |ui| {
             ui.label("Input String");
             
@@ -60,7 +61,7 @@ impl BaseNode for ImageDisplayNode {
             })
     }
 
-    fn show_output(&mut self, pin: &OutPin, ui: &mut Ui) -> PinInfo {
+    fn show_output(&mut self, _pin: &OutPin, _ui: &mut Ui) -> PinInfo {
         unreachable!("ImageDisplay node has no outputs")
     }
 

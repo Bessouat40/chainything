@@ -2,11 +2,11 @@ use std::collections::HashMap;
 
 use crate::nodes::base_node::{BaseNode, InputOutputType, STRING_COLOR};
 
-use egui::{Color32, Ui};
+use egui::{Ui};
 use egui_snarl::{
-    InPin, InPinId, NodeId, OutPin, OutPinId, Snarl,
+    InPin, OutPin,
     ui::{
-        AnyPins, PinInfo, SnarlViewer,
+        PinInfo,
         WireStyle,
     },
 };
@@ -49,7 +49,7 @@ impl BaseNode for TextInputNode {
         Some(HashMap::from([(0, InputOutputType::String("".to_string()))]))
     }
 
-    fn show_input(&mut self, pin: &InPin, ui: &mut Ui) -> PinInfo {
+    fn show_input(&mut self, _pin: &InPin, _ui: &mut Ui) -> PinInfo {
         unreachable!("TextInputProcessor node has no inputs")
 
     }

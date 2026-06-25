@@ -1,5 +1,5 @@
 use egui::Ui;
-use egui_snarl::{ui::SnarlWidget, InPinId, OutPinId, Snarl}; 
+use egui_snarl::{ui::SnarlWidget, Snarl}; 
 use crate::nodes::node_registry::NodeRegistry;
 use crate::nodes::viewer::DemoViewer;
 
@@ -16,7 +16,7 @@ impl Default for DAGLayout {
 
 impl DAGLayout {
     pub fn new() -> Self {
-        let mut snarl = Snarl::new();
+        let snarl = Snarl::new();
         let demo_viewer = DemoViewer::new();
 
         // snarl.insert_node(

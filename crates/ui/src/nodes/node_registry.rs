@@ -42,7 +42,7 @@ impl NodeRegistry {
         .collect()
     }
 
-    pub fn get_node(&self, node_name: String) -> Option<&dyn BaseNode> {
+    pub fn _get_node(&self, node_name: String) -> Option<&dyn BaseNode> {
         match self.nodes.get(&node_name) {
             Some(n) => Some(n.as_ref()),
             None => None,
@@ -51,7 +51,7 @@ impl NodeRegistry {
     
     pub fn create_node(&self, node_name: &str) -> Option<Box<dyn BaseNode>> {
         match self.nodes.get(node_name) {
-            Some(n) => self.nodes.get(node_name).cloned(),
+            Some(_) => self.nodes.get(node_name).cloned(),
             None => None,
         }
     }

@@ -1,21 +1,17 @@
 #![allow(clippy::use_self)]
 
-use crate::nodes::node::MyNode;
 use crate::nodes::node_registry::NodeRegistry;
 use crate::nodes::base_node::BaseNode;
 
 use std::mem::discriminant;
 
-use egui::{Color32, Ui};
+use egui::{Ui};
 use egui_snarl::{
-    InPin, InPinId, NodeId, OutPin, OutPinId, Snarl,
+    InPin, NodeId, OutPin, Snarl,
     ui::{
         AnyPins, PinInfo, SnarlViewer,
-        WireStyle,
     },
 };
-
-const STRING_COLOR: Color32 = Color32::from_rgb(0x00, 0xb0, 0x00);
 
 pub struct DemoViewer {
     pub node_registry: NodeRegistry,

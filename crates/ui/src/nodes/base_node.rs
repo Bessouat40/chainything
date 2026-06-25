@@ -4,10 +4,9 @@ use dyn_clone::DynClone;
 use chainything::processors::greyscale_processor::RawImage;
 use egui::{Color32, Ui};
 use egui_snarl::{
-    InPin, InPinId, NodeId, OutPin, OutPinId, Snarl,
+    InPin, NodeId, OutPin, Snarl,
     ui::{
-        AnyPins, PinInfo, SnarlViewer,
-        WireStyle,
+        PinInfo,
     },
 };
 

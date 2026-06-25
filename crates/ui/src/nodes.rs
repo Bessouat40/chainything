@@ -1,4 +1,3 @@
-pub mod node;
 pub mod viewer;
 pub mod node_registry;
 pub mod base_node;
