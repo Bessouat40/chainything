@@ -18,11 +18,15 @@ impl GreyScaleNode {
 
 impl BaseNode for GreyScaleNode {
     fn name(&self) -> &str {
-        "GreyScaleNode"
+        "Greyscale"
     }
 
     fn get_value(&self) -> Option<&Vec<InputOutputType>> {
         None
+    }
+    
+    fn is_processor(&self) -> bool {
+        true
     }
 
     fn inputs_count(&self) -> usize {

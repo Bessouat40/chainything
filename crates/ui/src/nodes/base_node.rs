@@ -25,6 +25,7 @@ impl InputOutputType {
 pub trait BaseNode: DynClone {
     fn name(&self) -> &str;
     fn inputs_count(&self) -> usize;
+    fn is_processor(&self) -> bool;
     fn outputs_count(&self) -> usize;
     fn mapping_input(&self) -> Option<HashMap<usize, InputOutputType>>;
     fn mapping_output(&self) -> Option<HashMap<usize, InputOutputType>>;

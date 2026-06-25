@@ -4,6 +4,7 @@ mod bottom_panel;
 mod dag_layout;
 mod left_panel;
 mod nodes;
+mod payload_parser;
 
 use app::ChainythingApp;
 

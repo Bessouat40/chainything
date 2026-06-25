@@ -24,7 +24,7 @@ impl eframe::App for ChainythingApp {
         egui::CentralPanel::default().show_inside(ctx, |ui| {
             let (snarl, node_registry) = self.dag_layout.get_snarl_and_registry();
             self.left_panel.show(ui, snarl, node_registry);
-            self.bottom_panel.show(ui);
+            self.bottom_panel.show(ui, &self.dag_layout);
             self.dag_layout.show(ui);
         });
     }

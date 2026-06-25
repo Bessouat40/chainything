@@ -19,7 +19,11 @@ impl ImageReaderNode {
 
 impl BaseNode for ImageReaderNode {
     fn name(&self) -> &str {
-        "ImageReaderNode"
+        "ImageReader"
+    }
+
+    fn is_processor(&self) -> bool {
+        true
     }
 
     fn get_value(&self) -> Option<&Vec<InputOutputType>> {

@@ -30,6 +30,10 @@ impl BaseNode for TextInputNode {
         Some(&self.value)
     }
 
+    fn is_processor(&self) -> bool {
+        false
+    }
+
     fn inputs_count(&self) -> usize {
         0
     }

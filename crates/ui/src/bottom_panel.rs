@@ -1,4 +1,6 @@
 use egui::*;
+use chainything::prelude::*;
+use crate::dag_layout::DAGLayout;
 
 #[derive(Default)]
 pub struct BottomPanel {}
@@ -8,7 +10,7 @@ impl BottomPanel {
         Self {}
     }
 
-    pub fn show(&mut self, ui: &mut egui::Ui) {
+    pub fn show(&mut self, ui: &mut egui::Ui, dag_layout: &DAGLayout) {
         egui::Panel::bottom("bottom_panel")
             .resizable(false)
             .frame(egui::Frame::default().fill(ui.style().visuals.panel_fill).inner_margin(Margin::same(12)))
@@ -25,9 +27,36 @@ impl BottomPanel {
                     .min_size(Vec2::new(130.0, 38.0));
 
                     if ui.add(run_btn).on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
-                        println!("Executing DAG...");
+                        execute_pipeline(dag_layout);
                     }
                 });
             });
+    }
+}
+
+fn execute_pipeline(dag_layout: &DAGLayout) {
+    let json_data = dag_layout.export_to_json();
+    let registry = ProcessorRegistry::with_standard_processors();
+
+    println!("{:?}", json_data);
+    match PipelineBuilder::build_from_json(&json_data, &registry) {
+        Ok(mut pipeline) => {
+            println!("Pipeline built, executing...");
+
+            match pipeline.execute() {
+                Ok(_) => println!("✓ Pipeline executed successfully!"),
+                Err(e) => match e {
+                    PipelineErrors::UnknownProcessor(id) => {
+                        eprintln!("✗ Error: Unknown processor {}", id)
+                    }
+                    PipelineErrors::ComputingError(msg) => eprintln!("✗ Computing error: {}", msg),
+                    _ => eprintln!("✗ An error occurred!"),
+                },
+            }
+        }
+        Err(e) => match e {
+            PipelineErrors::ComputingError(msg) => eprintln!("✗ Build error: {}", msg),
+            _ => eprintln!("✗ Unknown error!"),
+        },
     }
 }

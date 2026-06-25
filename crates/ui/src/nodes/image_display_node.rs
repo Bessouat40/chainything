@@ -26,6 +26,10 @@ impl BaseNode for ImageDisplayNode {
         None
     }
 
+    fn is_processor(&self) -> bool {
+        false
+    }
+
     fn inputs_count(&self) -> usize {
         1
     }
