@@ -2,17 +2,14 @@ use std::collections::HashMap;
 
 use crate::nodes::base_node::{BaseNode, InputOutputType, STRING_COLOR};
 
-use egui::{Ui};
+use egui::Ui;
 use egui_snarl::{
     InPin, OutPin,
-    ui::{
-        PinInfo,
-        WireStyle,
-    },
+    ui::{PinInfo, WireStyle},
 };
 
 #[derive(Clone)]
-pub struct TextInputNode{
+pub struct TextInputNode {
     value: Vec<InputOutputType>,
 }
 
@@ -46,26 +43,26 @@ impl BaseNode for TextInputNode {
     }
 
     fn mapping_output(&self) -> Option<HashMap<usize, InputOutputType>> {
-        Some(HashMap::from([(0, InputOutputType::String("".to_string()))]))
+        Some(HashMap::from([(
+            0,
+            InputOutputType::String("".to_string()),
+        )]))
     }
 
     fn show_input(&mut self, _pin: &InPin, _ui: &mut Ui) -> PinInfo {
-        unreachable!("TextInputProcessor node has no inputs")
-
+        PinInfo::circle()
     }
 
-    fn show_output(&mut self, pin: &OutPin, ui: &mut Ui) -> PinInfo {
-        assert_eq!(pin.id.output, 0, "TextInputNode a seulement une sortie");
-
+    fn show_output(&mut self, _pin: &OutPin, ui: &mut Ui) -> PinInfo {
         ui.with_layout(egui::Layout::top_down(egui::Align::Max), |ui| {
             ui.label("Valeur :");
-            
+
             if let InputOutputType::String(ref mut val) = self.value[0] {
                 ui.add(
                     egui::TextEdit::singleline(val)
                         .text_color(STRING_COLOR)
                         .desired_width(120.0)
-                        .font(egui::TextStyle::Monospace)
+                        .font(egui::TextStyle::Monospace),
                 );
             }
         });

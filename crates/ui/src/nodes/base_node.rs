@@ -1,14 +1,9 @@
-use std::collections::HashMap;
 use dyn_clone::DynClone;
+use std::collections::HashMap;
 
 use chainything::processors::greyscale_processor::RawImage;
 use egui::{Color32, Ui};
-use egui_snarl::{
-    InPin, NodeId, OutPin, Snarl,
-    ui::{
-        PinInfo,
-    },
-};
+use egui_snarl::{InPin, NodeId, OutPin, Snarl, ui::PinInfo};
 
 pub const STRING_COLOR: Color32 = Color32::from_rgb(0x00, 0xb0, 0x00);
 
@@ -45,7 +40,8 @@ pub trait BaseNode: DynClone {
         _outputs: &[OutPin],
         _ui: &mut Ui,
         _snarl: &Snarl<Box<dyn BaseNode>>,
-    ) {}
+    ) {
+    }
 }
 
 dyn_clone::clone_trait_object!(BaseNode);

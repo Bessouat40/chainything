@@ -15,12 +15,12 @@ fn main() -> eframe::Result {
             .with_title("Chainything"),
         ..Default::default()
     };
-    eframe::run_native("MyApp",
-    native_options,
-    Box::new(|cc| {
-
-        egui_extras::install_image_loaders(&cc.egui_ctx);
-        Ok(Box::new(ChainythingApp::new(cc)))
-    }))
+    eframe::run_native(
+        "MyApp",
+        native_options,
+        Box::new(|cc| {
+            egui_extras::install_image_loaders(&cc.egui_ctx);
+            Ok(Box::new(ChainythingApp::new(cc)))
+        }),
+    )
 }
-

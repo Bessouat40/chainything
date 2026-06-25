@@ -1,17 +1,12 @@
 use std::collections::HashMap;
 
-
 use crate::nodes::base_node::{BaseNode, InputOutputType, STRING_COLOR};
 
-use egui::{Ui};
+use egui::Ui;
 use egui_snarl::{
     InPin, NodeId, OutPin, Snarl,
-    ui::{
-        PinInfo,
-        WireStyle,
-    },
+    ui::{PinInfo, WireStyle},
 };
-
 
 #[derive(Clone)]
 pub struct ImageDisplayNode;
@@ -40,7 +35,10 @@ impl BaseNode for ImageDisplayNode {
     }
 
     fn mapping_input(&self) -> Option<HashMap<usize, InputOutputType>> {
-        Some(HashMap::from([(0, InputOutputType::String("".to_string()))]))
+        Some(HashMap::from([(
+            0,
+            InputOutputType::String("".to_string()),
+        )]))
     }
 
     fn mapping_output(&self) -> Option<HashMap<usize, InputOutputType>> {
@@ -50,7 +48,7 @@ impl BaseNode for ImageDisplayNode {
     fn show_input(&mut self, _pin: &InPin, ui: &mut Ui) -> PinInfo {
         ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |ui| {
             ui.label("Input String");
-            
+
             ui.add_space(5.0);
         });
 
@@ -62,7 +60,7 @@ impl BaseNode for ImageDisplayNode {
     }
 
     fn show_output(&mut self, _pin: &OutPin, _ui: &mut Ui) -> PinInfo {
-        unreachable!("ImageDisplay node has no outputs")
+        PinInfo::circle()
     }
 
     fn has_body(&self) -> bool {
@@ -83,12 +81,12 @@ impl BaseNode for ImageDisplayNode {
     ) {
         ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
             ui.set_width(200.0);
-            
+
             let input = &inputs[0];
             let url_to_display = match input.remotes.as_slice() {
                 [remote] => {
                     let remote_node = &snarl[remote.node];
-                    
+
                     if let Some(values) = remote_node.get_value() {
                         if let Some(InputOutputType::String(uri)) = values.get(remote.output) {
                             Some(uri.clone())

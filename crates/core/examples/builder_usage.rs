@@ -46,19 +46,21 @@ fn main() {
     match PipelineBuilder::build_from_json(json_data, &registry) {
         Ok(mut pipeline) => {
             println!("Pipeline built, executing...");
-            
+
             match pipeline.execute() {
                 Ok(_) => println!("Success!"),
                 Err(e) => match e {
-                    PipelineErrors::UnknownProcessor(id) => eprintln!("Error: Unknown processor {}", id),
+                    PipelineErrors::UnknownProcessor(id) => {
+                        eprintln!("Error: Unknown processor {}", id)
+                    }
                     PipelineErrors::ComputingError(msg) => eprintln!("Computing error: {}", msg),
                     _ => eprintln!("An error occurred!"),
-                }
+                },
             }
-        },
+        }
         Err(e) => match e {
             PipelineErrors::ComputingError(msg) => eprintln!("Build error: {}", msg),
             _ => eprintln!("Unknown error!"),
-        }
+        },
     }
 }

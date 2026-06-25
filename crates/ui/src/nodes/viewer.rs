@@ -1,16 +1,14 @@
 #![allow(clippy::use_self)]
 
-use crate::nodes::node_registry::NodeRegistry;
 use crate::nodes::base_node::BaseNode;
+use crate::nodes::node_registry::NodeRegistry;
 
 use std::mem::discriminant;
 
-use egui::{Ui};
+use egui::Ui;
 use egui_snarl::{
     InPin, NodeId, OutPin, Snarl,
-    ui::{
-        AnyPins, PinInfo, SnarlViewer,
-    },
+    ui::{AnyPins, PinInfo, SnarlViewer},
 };
 
 pub struct DemoViewer {
@@ -26,24 +24,24 @@ impl DemoViewer {
 }
 
 impl SnarlViewer<Box<dyn BaseNode>> for DemoViewer {
-    
     fn connect(&mut self, from: &OutPin, to: &InPin, snarl: &mut Snarl<Box<dyn BaseNode>>) {
-    let out_pin_idx = from.id.output;
-    let in_pin_idx = to.id.input;
+        let out_pin_idx = from.id.output;
+        let in_pin_idx = to.id.input;
 
-    let from_node = &snarl[from.id.node];
-    let to_node = &snarl[to.id.node];
+        let from_node = &snarl[from.id.node];
+        let to_node = &snarl[to.id.node];
 
-    if let (Some(out_map), Some(in_map)) = (from_node.mapping_output(), to_node.mapping_input()) {
-        
-        if let (Some(out_type), Some(in_type)) = (out_map.get(&out_pin_idx), in_map.get(&in_pin_idx)) {
-            
-            if discriminant(out_type) == discriminant(in_type) {
-                snarl.connect(from.id, to.id);
+        if let (Some(out_map), Some(in_map)) = (from_node.mapping_output(), to_node.mapping_input())
+        {
+            if let (Some(out_type), Some(in_type)) =
+                (out_map.get(&out_pin_idx), in_map.get(&in_pin_idx))
+            {
+                if discriminant(out_type) == discriminant(in_type) {
+                    snarl.connect(from.id, to.id);
+                }
             }
         }
     }
-}
 
     fn title(&mut self, node: &Box<dyn BaseNode>) -> String {
         node.name().to_string()
@@ -58,12 +56,22 @@ impl SnarlViewer<Box<dyn BaseNode>> for DemoViewer {
     }
 
     #[allow(refining_impl_trait)]
-    fn show_input(&mut self, pin: &InPin, ui: &mut Ui, snarl: &mut Snarl<Box<dyn BaseNode>>) -> PinInfo {
+    fn show_input(
+        &mut self,
+        pin: &InPin,
+        ui: &mut Ui,
+        snarl: &mut Snarl<Box<dyn BaseNode>>,
+    ) -> PinInfo {
         snarl[pin.id.node].show_input(pin, ui)
     }
 
     #[allow(refining_impl_trait)]
-    fn show_output(&mut self, pin: &OutPin, ui: &mut Ui, snarl: &mut Snarl<Box<dyn BaseNode>>) -> PinInfo {
+    fn show_output(
+        &mut self,
+        pin: &OutPin,
+        ui: &mut Ui,
+        snarl: &mut Snarl<Box<dyn BaseNode>>,
+    ) -> PinInfo {
         snarl[pin.id.node].show_output(pin, ui)
     }
 
@@ -82,7 +90,7 @@ impl SnarlViewer<Box<dyn BaseNode>> for DemoViewer {
     ) {
         let snarl_ref = &*snarl;
         let base_node = &snarl_ref[node];
-        
+
         base_node.show_body(node, inputs, outputs, ui, snarl_ref);
     }
 
@@ -90,18 +98,27 @@ impl SnarlViewer<Box<dyn BaseNode>> for DemoViewer {
         true
     }
 
-    fn show_graph_menu(&mut self, pos: egui::Pos2, ui: &mut Ui, snarl: &mut Snarl<Box<dyn BaseNode>>) {
-    for name in self.node_registry.get_available_nodes() {
-        if ui.button(name).clicked() {
-            let node = self.node_registry.create_node(name);
-            if let Some(created_node) = node {
-                snarl.insert_node(pos, created_node);
-            } 
+    fn show_graph_menu(
+        &mut self,
+        pos: egui::Pos2,
+        ui: &mut Ui,
+        snarl: &mut Snarl<Box<dyn BaseNode>>,
+    ) {
+        for name in self.node_registry.get_available_nodes() {
+            if ui.button(name).clicked() {
+                let node = self.node_registry.create_node(name);
+                if let Some(created_node) = node {
+                    snarl.insert_node(pos, created_node);
+                }
+            }
         }
     }
-}
 
-    fn has_dropped_wire_menu(&mut self, _src_pins: AnyPins, _snarl: &mut Snarl<Box<dyn BaseNode>>) -> bool {
+    fn has_dropped_wire_menu(
+        &mut self,
+        _src_pins: AnyPins,
+        _snarl: &mut Snarl<Box<dyn BaseNode>>,
+    ) -> bool {
         true
     }
 

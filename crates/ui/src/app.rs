@@ -1,6 +1,6 @@
-use crate::left_panel::LeftPanel;
 use crate::bottom_panel::BottomPanel;
 use crate::dag_layout::DAGLayout;
+use crate::left_panel::LeftPanel;
 
 #[derive(Default)]
 pub struct ChainythingApp {
@@ -27,5 +27,4 @@ impl eframe::App for ChainythingApp {
             self.dag_layout.show(ui);
         });
     }
-
 }

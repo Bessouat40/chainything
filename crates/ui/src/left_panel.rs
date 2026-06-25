@@ -7,7 +7,9 @@ pub struct LeftPanel {
 
 impl LeftPanel {
     pub fn new() -> Self {
-        Self { search: String::new() }
+        Self {
+            search: String::new(),
+        }
     }
 
     pub fn show(&mut self, ui: &mut egui::Ui) {
@@ -15,7 +17,12 @@ impl LeftPanel {
             .resizable(false)
             .show_inside(ui, |ui| {
                 ui.add_space(8.0);
-                ui.label(RichText::new("NODES LIBRARY").size(10.0).color(Color32::from_rgb(100, 100, 130)).strong());
+                ui.label(
+                    RichText::new("NODES LIBRARY")
+                        .size(10.0)
+                        .color(Color32::from_rgb(100, 100, 130))
+                        .strong(),
+                );
                 ui.add_space(8.0);
 
                 ui.add(
@@ -27,7 +34,6 @@ impl LeftPanel {
                 ui.add_space(10.0);
                 ui.separator();
                 ui.add_space(6.0);
-
             });
     }
 }

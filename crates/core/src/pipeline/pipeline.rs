@@ -1,11 +1,15 @@
 use crate::processors::base_processor::{ProcessorBase, ProcessorError};
-use std::{any::Any, collections::{HashMap, VecDeque}, sync::Arc};
+use std::{
+    any::Any,
+    collections::{HashMap, VecDeque},
+    sync::Arc,
+};
 
 pub enum PipelineErrors {
     UnknownProcessor(String),
     UnknownInputProcessor(String),
     WrongInputType(String),
-    ComputingError(String)
+    ComputingError(String),
 }
 
 impl From<ProcessorError> for PipelineErrors {
@@ -57,10 +61,7 @@ impl Pipeline {
     pub fn add_processor(&mut self, processor: Box<dyn ProcessorBase>, inputs: Vec<InputSource>) {
         let id = processor.id().to_string();
         self.processors.insert(id.clone(), processor);
-        self.connections.push(NodeConfig {
-            id,
-            inputs,
-        });
+        self.connections.push(NodeConfig { id, inputs });
     }
 
     pub fn plan(&self) -> Result<Vec<String>, PipelineErrors> {
@@ -76,17 +77,22 @@ impl Pipeline {
             let target_id = &config.id;
 
             for source in &config.inputs {
-                if let InputSource::Connection { node_id: source_id, .. } = source {
+                if let InputSource::Connection {
+                    node_id: source_id, ..
+                } = source
+                {
                     if !in_degree.contains_key(source_id) {
                         return Err(PipelineErrors::UnknownProcessor(source_id.clone()));
                     }
 
-                    let neighbors = adj_list.get_mut(source_id)
-                        .ok_or_else(|| PipelineErrors::ComputingError(format!("Corrupted graph: {}", source_id)))?;
+                    let neighbors = adj_list.get_mut(source_id).ok_or_else(|| {
+                        PipelineErrors::ComputingError(format!("Corrupted graph: {}", source_id))
+                    })?;
                     neighbors.push(target_id.clone());
-                    
-                    let degree = in_degree.get_mut(target_id)
-                        .ok_or_else(|| PipelineErrors::ComputingError(format!("Corrupted graph: {}", target_id)))?;
+
+                    let degree = in_degree.get_mut(target_id).ok_or_else(|| {
+                        PipelineErrors::ComputingError(format!("Corrupted graph: {}", target_id))
+                    })?;
                     *degree += 1;
                 }
             }
@@ -106,9 +112,13 @@ impl Pipeline {
 
             if let Some(neighbors) = adj_list.get(&current_id) {
                 for neighbor_id in neighbors {
-                    let degree = in_degree.get_mut(neighbor_id)
-                        .ok_or_else(|| PipelineErrors::ComputingError(format!("Node missing during topological sort: {}", neighbor_id)))?;
-                    
+                    let degree = in_degree.get_mut(neighbor_id).ok_or_else(|| {
+                        PipelineErrors::ComputingError(format!(
+                            "Node missing during topological sort: {}",
+                            neighbor_id
+                        ))
+                    })?;
+
                     *degree -= 1;
 
                     if *degree == 0 {
@@ -131,7 +141,9 @@ impl Pipeline {
         let execution_order = self.plan()?;
 
         for target_id in execution_order {
-            let mut target_processor = self.processors.remove(&target_id)
+            let mut target_processor = self
+                .processors
+                .remove(&target_id)
                 .ok_or_else(|| PipelineErrors::UnknownProcessor(target_id.clone()))?;
 
             let config = self.get_node_config(&target_id)?;
@@ -141,26 +153,32 @@ impl Pipeline {
                 match source {
                     InputSource::Static(data) => {
                         inputs.push(data.clone());
-                    },
-                    InputSource::Connection { node_id: source_id, output_slot } => {
-                        let source_processor = self.processors.get(source_id)
-                            .ok_or_else(|| PipelineErrors::UnknownInputProcessor(source_id.clone()))?;
-                        
+                    }
+                    InputSource::Connection {
+                        node_id: source_id,
+                        output_slot,
+                    } => {
+                        let source_processor = self.processors.get(source_id).ok_or_else(|| {
+                            PipelineErrors::UnknownInputProcessor(source_id.clone())
+                        })?;
+
                         let index = *output_slot;
-                        
+
                         let outputs = source_processor.get_output_erased();
-                        let data = outputs.get(index)
-                            .cloned()
-                            .ok_or_else(|| PipelineErrors::ComputingError(
-                                format!("Missing output {} for {} processor", index, source_id)
-                            ))?;
-                        
+                        let data = outputs.get(index).cloned().ok_or_else(|| {
+                            PipelineErrors::ComputingError(format!(
+                                "Missing output {} for {} processor",
+                                index, source_id
+                            ))
+                        })?;
+
                         inputs.push(data);
                     }
                 }
             }
 
-            let result = target_processor.set_input_erased(inputs)
+            let result = target_processor
+                .set_input_erased(inputs)
                 .map_err(PipelineErrors::from)
                 .and_then(|_| target_processor.process().map_err(PipelineErrors::from));
 
@@ -173,6 +191,9 @@ impl Pipeline {
     }
 
     fn get_node_config(&self, id: &str) -> Result<&NodeConfig, PipelineErrors> {
-        self.connections.iter().find(|c| c.id == id).ok_or(PipelineErrors::UnknownProcessor(id.to_string()))
+        self.connections
+            .iter()
+            .find(|c| c.id == id)
+            .ok_or(PipelineErrors::UnknownProcessor(id.to_string()))
     }
 }

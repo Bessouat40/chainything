@@ -2,13 +2,10 @@ use std::collections::HashMap;
 
 use crate::nodes::base_node::{BaseNode, InputOutputType, STRING_COLOR};
 
-use egui::{Ui};
+use egui::Ui;
 use egui_snarl::{
     InPin, OutPin,
-    ui::{
-        PinInfo,
-        WireStyle,
-    },
+    ui::{PinInfo, WireStyle},
 };
 
 #[derive(Clone)]
@@ -38,7 +35,10 @@ impl BaseNode for ImageReaderNode {
     }
 
     fn mapping_input(&self) -> Option<HashMap<usize, InputOutputType>> {
-        Some(HashMap::from([(0, InputOutputType::String("".to_string()))]))
+        Some(HashMap::from([(
+            0,
+            InputOutputType::String("".to_string()),
+        )]))
     }
 
     fn mapping_output(&self) -> Option<HashMap<usize, InputOutputType>> {
@@ -48,7 +48,7 @@ impl BaseNode for ImageReaderNode {
     fn show_input(&mut self, _pin: &InPin, ui: &mut Ui) -> PinInfo {
         ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |ui| {
             ui.label("Input String");
-            
+
             ui.add_space(5.0);
         });
 
@@ -62,7 +62,7 @@ impl BaseNode for ImageReaderNode {
     fn show_output(&mut self, _pin: &OutPin, ui: &mut Ui) -> PinInfo {
         ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |ui| {
             ui.label("Output Raw Image");
-            
+
             ui.add_space(5.0);
         });
 
