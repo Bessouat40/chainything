@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use crate::nodes::base_node::{BaseNode, InputOutputType, STRING_COLOR};
-
 use egui::Ui;
 use egui_snarl::{
     InPin, OutPin,
@@ -9,17 +8,17 @@ use egui_snarl::{
 };
 
 #[derive(Clone)]
-pub struct ImageReaderNode;
+pub struct GreyScaleNode;
 
-impl ImageReaderNode {
+impl GreyScaleNode {
     pub fn new() -> Self {
         Self
     }
 }
 
-impl BaseNode for ImageReaderNode {
+impl BaseNode for GreyScaleNode {
     fn name(&self) -> &str {
-        "ImageReaderNode"
+        "GreyScaleNode"
     }
 
     fn get_value(&self) -> Option<&Vec<InputOutputType>> {
@@ -35,10 +34,7 @@ impl BaseNode for ImageReaderNode {
     }
 
     fn mapping_input(&self) -> Option<HashMap<usize, InputOutputType>> {
-        Some(HashMap::from([(
-            0,
-            InputOutputType::String("".to_string()),
-        )]))
+        Some(HashMap::from([(0, InputOutputType::RawImage(None))]))
     }
 
     fn mapping_output(&self) -> Option<HashMap<usize, InputOutputType>> {
@@ -46,10 +42,10 @@ impl BaseNode for ImageReaderNode {
     }
 
     fn show_input(&mut self, _pin: &InPin, ui: &mut Ui) -> PinInfo {
-        ui.set_min_width(200.0); 
+        ui.set_min_width(180.0);
 
         ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |ui| {
-            ui.label("String");
+            ui.label("Raw Image");
         });
 
         PinInfo::circle()
@@ -65,7 +61,7 @@ impl BaseNode for ImageReaderNode {
         });
 
         PinInfo::circle()
-            .with_fill(STRING_COLOR) 
+            .with_fill(STRING_COLOR)
             .with_wire_style(WireStyle::AxisAligned {
                 corner_radius: 10.0,
             })
@@ -76,6 +72,6 @@ impl BaseNode for ImageReaderNode {
     }
 
     fn header_frame(&self, frame: egui::Frame) -> egui::Frame {
-        frame.fill(egui::Color32::from_rgb(70, 40, 40))
+        frame.fill(egui::Color32::from_rgb(50, 60, 70))
     }
 }

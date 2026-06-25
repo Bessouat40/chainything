@@ -55,7 +55,7 @@ impl BaseNode for TextInputNode {
 
     fn show_output(&mut self, _pin: &OutPin, ui: &mut Ui) -> PinInfo {
         ui.with_layout(egui::Layout::top_down(egui::Align::Max), |ui| {
-            ui.label("Valeur :");
+            ui.label("String");
 
             if let InputOutputType::String(ref mut val) = self.value[0] {
                 ui.add(

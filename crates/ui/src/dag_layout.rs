@@ -1,10 +1,10 @@
-use crate::nodes::base_node::BaseNode;
+use crate::nodes::{base_node::BaseNode, node_registry::NodeRegistry};
 use crate::nodes::viewer::DemoViewer;
 use egui::Ui;
 use egui_snarl::{Snarl, ui::SnarlWidget};
 
 pub struct DAGLayout {
-    snarl: Snarl<Box<dyn BaseNode>>,
+    pub snarl: Snarl<Box<dyn BaseNode>>,
     viewer: DemoViewer,
 }
 
@@ -61,6 +61,10 @@ impl DAGLayout {
             snarl,
             viewer: demo_viewer,
         }
+    }
+
+    pub fn get_snarl_and_registry(&mut self) -> (&mut Snarl<Box<dyn BaseNode>>, &NodeRegistry) {
+        (&mut self.snarl, &self.viewer.node_registry)
     }
 
     pub fn show(&mut self, ui: &mut Ui) {
