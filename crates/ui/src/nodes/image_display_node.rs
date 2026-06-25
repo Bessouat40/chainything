@@ -85,6 +85,7 @@ impl BaseNode for ImageDisplayNode {
     ) {
         ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
             ui.set_width(200.0);
+            ui.set_min_height(200.0);
 
             let input = &inputs[0];
             let url_to_display = match input.remotes.as_slice() {
@@ -105,7 +106,11 @@ impl BaseNode for ImageDisplayNode {
             };
 
             if let Some(uri) = url_to_display {
-                ui.add(egui::Image::new(&uri).show_loading_spinner(true));
+                ui.add(
+                    egui::Image::new(&uri)
+                        .show_loading_spinner(true)
+                        .fit_to_exact_size(egui::Vec2::new(200.0, 200.0)),
+                );
             } else {
                 ui.label("No image to display");
             }

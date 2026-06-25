@@ -786,6 +786,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "chainything-ui"
+version = "0.1.0"
+dependencies = [
+ "chainything",
+ "dyn-clone",
+ "eframe",
+ "egui",
+ "egui-snarl",
+ "egui_extras",
+ "env_logger",
+ "image",
+ "serde",
+ "serde_json",
+ "toml",
+]
+
+[[package]]
 name = "clipboard-win"
 version = "5.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4177,23 +4194,6 @@ dependencies = [
  "memoffset",
  "tempfile",
  "windows-sys 0.61.2",
-]
-
-[[package]]
-name = "ui"
-version = "0.1.0"
-dependencies = [
- "chainything",
- "dyn-clone",
- "eframe",
- "egui",
- "egui-snarl",
- "egui_extras",
- "env_logger",
- "image",
- "serde",
- "serde_json",
- "toml",
 ]
 
 [[package]]

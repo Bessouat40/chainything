@@ -46,7 +46,6 @@ fn execute_pipeline(dag_layout: &DAGLayout) {
     let json_data = dag_layout.export_to_json();
     let registry = ProcessorRegistry::with_standard_processors();
 
-    println!("{:?}", json_data);
     match PipelineBuilder::build_from_json(&json_data, &registry) {
         Ok(mut pipeline) => {
             println!("Pipeline built, executing...");
