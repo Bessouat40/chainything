@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use crate::nodes::base_node::{BaseNode, InputOutputType, STRING_COLOR};
-
 use egui::Ui;
 use egui_snarl::{
     InPin, OutPin,
@@ -9,33 +8,29 @@ use egui_snarl::{
 };
 
 #[derive(Clone)]
-pub struct TextInputNode {
-    value: Vec<InputOutputType>,
-}
+pub struct GreyScaleNode;
 
-impl TextInputNode {
+impl GreyScaleNode {
     pub fn new() -> Self {
-        Self {
-            value: vec![InputOutputType::String("".to_string())],
-        }
+        Self
     }
 }
 
-impl BaseNode for TextInputNode {
+impl BaseNode for GreyScaleNode {
     fn name(&self) -> &str {
-        "TextInputNode"
+        "Greyscale"
     }
 
     fn get_value(&self) -> Option<&Vec<InputOutputType>> {
-        Some(&self.value)
+        None
     }
-
+    
     fn is_processor(&self) -> bool {
-        false
+        true
     }
 
     fn inputs_count(&self) -> usize {
-        0
+        1
     }
 
     fn outputs_count(&self) -> usize {
@@ -43,32 +38,30 @@ impl BaseNode for TextInputNode {
     }
 
     fn mapping_input(&self) -> Option<HashMap<usize, InputOutputType>> {
-        None
+        Some(HashMap::from([(0, InputOutputType::RawImage(None))]))
     }
 
     fn mapping_output(&self) -> Option<HashMap<usize, InputOutputType>> {
-        Some(HashMap::from([(
-            0,
-            InputOutputType::String("".to_string()),
-        )]))
+        Some(HashMap::from([(0, InputOutputType::RawImage(None))]))
     }
 
-    fn show_input(&mut self, _pin: &InPin, _ui: &mut Ui) -> PinInfo {
+    fn show_input(&mut self, _pin: &InPin, ui: &mut Ui) -> PinInfo {
+        ui.set_min_width(180.0);
+
+        ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |ui| {
+            ui.label("Raw Image");
+        });
+
         PinInfo::circle()
+            .with_fill(STRING_COLOR)
+            .with_wire_style(WireStyle::AxisAligned {
+                corner_radius: 10.0,
+            })
     }
 
     fn show_output(&mut self, _pin: &OutPin, ui: &mut Ui) -> PinInfo {
-        ui.with_layout(egui::Layout::top_down(egui::Align::Max), |ui| {
-            ui.label("String");
-
-            if let InputOutputType::String(ref mut val) = self.value[0] {
-                ui.add(
-                    egui::TextEdit::singleline(val)
-                        .text_color(STRING_COLOR)
-                        .desired_width(120.0)
-                        .font(egui::TextStyle::Monospace),
-                );
-            }
+        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+            ui.label("Raw Image");
         });
 
         PinInfo::circle()
@@ -83,6 +76,6 @@ impl BaseNode for TextInputNode {
     }
 
     fn header_frame(&self, frame: egui::Frame) -> egui::Frame {
-        frame.fill(egui::Color32::from_rgb(70, 70, 80))
+        frame.fill(egui::Color32::from_rgb(50, 60, 70))
     }
 }

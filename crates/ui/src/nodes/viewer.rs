@@ -8,7 +8,7 @@ use std::mem::discriminant;
 use egui::Ui;
 use egui_snarl::{
     InPin, NodeId, OutPin, Snarl,
-    ui::{AnyPins, PinInfo, SnarlViewer},
+    ui::{PinInfo, SnarlViewer},
 };
 
 pub struct DemoViewer {
@@ -25,6 +25,9 @@ impl DemoViewer {
 
 impl SnarlViewer<Box<dyn BaseNode>> for DemoViewer {
     fn connect(&mut self, from: &OutPin, to: &InPin, snarl: &mut Snarl<Box<dyn BaseNode>>) {
+        if !to.remotes.is_empty() {
+            return; 
+        }
         let out_pin_idx = from.id.output;
         let in_pin_idx = to.id.input;
 
@@ -94,111 +97,6 @@ impl SnarlViewer<Box<dyn BaseNode>> for DemoViewer {
         base_node.show_body(node, inputs, outputs, ui, snarl_ref);
     }
 
-    fn has_graph_menu(&mut self, _pos: egui::Pos2, _snarl: &mut Snarl<Box<dyn BaseNode>>) -> bool {
-        true
-    }
-
-    fn show_graph_menu(
-        &mut self,
-        pos: egui::Pos2,
-        ui: &mut Ui,
-        snarl: &mut Snarl<Box<dyn BaseNode>>,
-    ) {
-        for name in self.node_registry.get_available_nodes() {
-            if ui.button(name).clicked() {
-                let node = self.node_registry.create_node(name);
-                if let Some(created_node) = node {
-                    snarl.insert_node(pos, created_node);
-                }
-            }
-        }
-    }
-
-    fn has_dropped_wire_menu(
-        &mut self,
-        _src_pins: AnyPins,
-        _snarl: &mut Snarl<Box<dyn BaseNode>>,
-    ) -> bool {
-        true
-    }
-
-    // #[inline]
-    // fn has_body(&mut self, node: &Box<dyn BaseNode>) -> bool {
-    //     node.has_body()
-    // }
-
-    // fn show_dropped_wire_menu(
-    //     &mut self,
-    //     pos: egui::Pos2,
-    //     ui: &mut Ui,
-    //     src_pins: AnyPins,
-    //     snarl: &mut Snarl<Box<dyn BaseNode>>,
-    // ) {
-
-    //     ui.label("Add node");
-
-    //     match src_pins {
-    //         AnyPins::Out(src_pins) => {
-    //             if src_pins.len() != 1 {
-    //                 ui.label("Multiple output pins are not supported in this demo");
-    //                 return;
-    //             }
-
-    //             let src_pin = src_pins[0];
-    //             let src_out_ty = pin_out_compat(self.node_registry.get_node(src_pin.node).unwrap());
-    //             let dst_in_candidates: &[(&str, fn() -> MyNode, PinCompat)] = &[
-    //                 ("Image Reader", || MyNode::ImageReaderProcessor(String::new()), PIN_STR),
-    //             ];
-
-    //             for (name, ctor, in_ty) in dst_in_candidates {
-    //                 if src_out_ty & in_ty != 0 && ui.button(*name).clicked() {
-    //                     let new_node = snarl.insert_node(pos, ctor());
-    //                     let dst_pin = InPinId {
-    //                         node: new_node,
-    //                         input: 0,
-    //                     };
-
-    //                     snarl.connect(src_pin, dst_pin);
-    //                     ui.close();
-    //                 }
-    //             }
-    //         }
-    //         AnyPins::In(pins) => {
-    //             let all_src_types = pins.iter().fold(0, |acc, pin| {
-    //                 acc | pin_in_compat(snarl.get_node(pin.node).unwrap(), pin.input)
-    //             });
-
-    //             let dst_out_candidates = &[
-    //                 ("Text Input", Box::new(|| MyNode::TextInputProcessor(String::new())) as Box<dyn Fn() -> MyNode>, PIN_STR),
-    //                 ("Image Reader", Box::new(|| MyNode::ImageReaderProcessor(String::new())) as Box<dyn Fn() -> MyNode>, PIN_STR),
-    //             ];
-
-    //             for (name, ctor, out_ty) in dst_out_candidates {
-    //                 if all_src_types & out_ty != 0 && ui.button(*name).clicked() {
-    //                     let new_node = ctor();
-    //                     let dst_ty = pin_out_compat(&new_node);
-
-    //                     let new_node = snarl.insert_node(pos, new_node);
-    //                     let dst_pin = OutPinId {
-    //                         node: new_node,
-    //                         output: 0,
-    //                     };
-
-    //                     for src_pin in pins {
-    //                         let src_ty =
-    //                             pin_in_compat(snarl.get_node(src_pin.node).unwrap(), src_pin.input);
-    //                         if src_ty & dst_ty != 0 {
-    //                             snarl.drop_inputs(*src_pin);
-    //                             snarl.connect(dst_pin, *src_pin);
-    //                             ui.close();
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-
     fn has_node_menu(&mut self, _node: &Box<dyn BaseNode>) -> bool {
         true
     }
@@ -216,10 +114,6 @@ impl SnarlViewer<Box<dyn BaseNode>> for DemoViewer {
             snarl.remove_node(node);
             ui.close();
         }
-    }
-
-    fn has_on_hover_popup(&mut self, _: &Box<dyn BaseNode>) -> bool {
-        true
     }
 
     fn header_frame(

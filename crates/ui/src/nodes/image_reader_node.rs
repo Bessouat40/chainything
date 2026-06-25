@@ -19,7 +19,11 @@ impl ImageReaderNode {
 
 impl BaseNode for ImageReaderNode {
     fn name(&self) -> &str {
-        "ImageReaderNode"
+        "ImageReader"
+    }
+
+    fn is_processor(&self) -> bool {
+        true
     }
 
     fn get_value(&self) -> Option<&Vec<InputOutputType>> {
@@ -46,10 +50,10 @@ impl BaseNode for ImageReaderNode {
     }
 
     fn show_input(&mut self, _pin: &InPin, ui: &mut Ui) -> PinInfo {
-        ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |ui| {
-            ui.label("Input String");
+        ui.set_min_width(200.0); 
 
-            ui.add_space(5.0);
+        ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |ui| {
+            ui.label("String");
         });
 
         PinInfo::circle()
@@ -60,14 +64,12 @@ impl BaseNode for ImageReaderNode {
     }
 
     fn show_output(&mut self, _pin: &OutPin, ui: &mut Ui) -> PinInfo {
-        ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |ui| {
-            ui.label("Output Raw Image");
-
-            ui.add_space(5.0);
+        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+            ui.label("Raw Image");
         });
 
         PinInfo::circle()
-            .with_fill(STRING_COLOR)
+            .with_fill(STRING_COLOR) 
             .with_wire_style(WireStyle::AxisAligned {
                 corner_radius: 10.0,
             })
