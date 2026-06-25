@@ -16,6 +16,14 @@ It allows you to easily chain complex operations (like image processing, data tr
 
 ## Quick Start
 
+### Visual Node Editor
+
+Here's what the UI looks like in action:
+
+![Chainything UI](./media/ui.png)
+
+### Programmatic Usage
+
 Here is a simple example showing how to load an image, convert it to grayscale, and save it using Chainything:
 
 ```rust
