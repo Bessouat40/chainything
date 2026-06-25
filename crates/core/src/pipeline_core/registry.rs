@@ -9,7 +9,7 @@ use crate::processors::{
 type ProcessorConstructor = Box<dyn Fn(String) -> Result<Box<dyn ProcessorBase>, String>>;
 
 /// A registry responsible for mapping node type strings to processor factory functions.
-/// 
+///
 /// This acts as a factory pattern container, allowing for dynamic instantiation of
 /// different processor types based on configuration.
 pub struct ProcessorRegistry {
@@ -104,7 +104,7 @@ impl Default for ProcessorRegistry {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::processors::base_processor::{ProcessorError, Processor};
+    use crate::processors::base_processor::{Processor, ProcessorError};
     use std::{any::Any, sync::Arc};
 
     struct AddOneProcessor {
@@ -115,14 +115,23 @@ mod tests {
 
     impl AddOneProcessor {
         fn new(id: &str) -> Self {
-            Self { id: id.to_string(), input: vec![], output: vec![] }
+            Self {
+                id: id.to_string(),
+                input: vec![],
+                output: vec![],
+            }
         }
     }
 
     impl Processor for AddOneProcessor {
-        fn id(&self) -> &str { &self.id }
+        fn id(&self) -> &str {
+            &self.id
+        }
 
-        fn set_input(&mut self, input: Vec<Arc<dyn Any + Send + Sync>>) -> Result<(), ProcessorError> {
+        fn set_input(
+            &mut self,
+            input: Vec<Arc<dyn Any + Send + Sync>>,
+        ) -> Result<(), ProcessorError> {
             self.input = input
                 .iter()
                 .map(|v| {
@@ -135,7 +144,10 @@ mod tests {
         }
 
         fn get_output(&self) -> Vec<Arc<dyn Any + Send + Sync>> {
-            self.output.iter().map(|&v| Arc::new(v) as Arc<dyn Any + Send + Sync>).collect()
+            self.output
+                .iter()
+                .map(|&v| Arc::new(v) as Arc<dyn Any + Send + Sync>)
+                .collect()
         }
 
         fn process(&mut self) -> Result<(), ProcessorError> {
@@ -166,13 +178,19 @@ mod tests {
     fn test_set_input_wrong_type() {
         let mut p = AddOneProcessor::new("p1");
         let bad = Arc::new("nope".to_string()) as Arc<dyn Any + Send + Sync>;
-        assert!(matches!(p.set_input_erased(vec![bad]), Err(ProcessorError::InvalidInput(_))));
+        assert!(matches!(
+            p.set_input_erased(vec![bad]),
+            Err(ProcessorError::InvalidInput(_))
+        ));
     }
 
     #[test]
     fn test_process_missing_input() {
         let mut p = AddOneProcessor::new("p1");
-        assert!(matches!(Processor::process(&mut p), Err(ProcessorError::MissingInput(_))));
+        assert!(matches!(
+            Processor::process(&mut p),
+            Err(ProcessorError::MissingInput(_))
+        ));
     }
 
     #[test]

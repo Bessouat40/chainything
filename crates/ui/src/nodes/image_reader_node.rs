@@ -50,7 +50,7 @@ impl BaseNode for ImageReaderNode {
     }
 
     fn show_input(&mut self, _pin: &InPin, ui: &mut Ui) -> PinInfo {
-        ui.set_min_width(200.0); 
+        ui.set_min_width(200.0);
 
         ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |ui| {
             ui.label("String");
@@ -69,7 +69,7 @@ impl BaseNode for ImageReaderNode {
         });
 
         PinInfo::circle()
-            .with_fill(STRING_COLOR) 
+            .with_fill(STRING_COLOR)
             .with_wire_style(WireStyle::AxisAligned {
                 corner_radius: 10.0,
             })

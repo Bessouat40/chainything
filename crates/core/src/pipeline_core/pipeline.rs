@@ -56,6 +56,12 @@ pub struct Pipeline {
     connections: Vec<NodeConfig>,
 }
 
+impl Default for Pipeline {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Pipeline {
     pub fn new() -> Pipeline {
         Pipeline {
@@ -154,12 +160,12 @@ impl Pipeline {
     }
 
     /// Executes all processors in the pipeline based on the topological plan.
-    /// 
-    /// This method resolves input dependencies for each processor and triggers 
+    ///
+    /// This method resolves input dependencies for each processor and triggers
     /// the `process()` logic sequentially.
     ///
     /// # Errors
-    /// * Returns `PipelineErrors` if planning fails, an input is missing, 
+    /// * Returns `PipelineErrors` if planning fails, an input is missing,
     ///   or a processor returns an error during execution.
     pub fn execute(&mut self) -> Result<(), PipelineErrors> {
         let execution_order = self.plan()?;
@@ -228,10 +234,21 @@ struct _MockProcessor {
 }
 
 impl ProcessorBase for _MockProcessor {
-    fn id(&self) -> &str { &self.id }
-    fn process(&mut self) -> Result<(), ProcessorError> { Ok(()) }
-    fn get_output_erased(&self) -> Vec<Arc<dyn Any + Send + Sync>> { vec![] }
-    fn set_input_erased(&mut self, _inputs: Vec<Arc<dyn Any + Send + Sync>>) -> Result<(), ProcessorError> { Ok(()) }
+    fn id(&self) -> &str {
+        &self.id
+    }
+    fn process(&mut self) -> Result<(), ProcessorError> {
+        Ok(())
+    }
+    fn get_output_erased(&self) -> Vec<Arc<dyn Any + Send + Sync>> {
+        vec![]
+    }
+    fn set_input_erased(
+        &mut self,
+        _inputs: Vec<Arc<dyn Any + Send + Sync>>,
+    ) -> Result<(), ProcessorError> {
+        Ok(())
+    }
 }
 
 #[cfg(test)]
@@ -241,11 +258,17 @@ mod tests {
     #[test]
     fn test_topological_sort_valid() {
         let mut pipeline = Pipeline::new();
-        
+
         // A -> B -> C
-        pipeline.add_processor(Box::new(_MockProcessor { id: "C".into() }), vec![InputSource::connection("B", 0)]);
+        pipeline.add_processor(
+            Box::new(_MockProcessor { id: "C".into() }),
+            vec![InputSource::connection("B", 0)],
+        );
         pipeline.add_processor(Box::new(_MockProcessor { id: "A".into() }), vec![]);
-        pipeline.add_processor(Box::new(_MockProcessor { id: "B".into() }), vec![InputSource::connection("A", 0)]);
+        pipeline.add_processor(
+            Box::new(_MockProcessor { id: "B".into() }),
+            vec![InputSource::connection("A", 0)],
+        );
 
         let plan = pipeline.plan().unwrap();
         assert_eq!(plan, vec!["A", "B", "C"]);
@@ -254,10 +277,16 @@ mod tests {
     #[test]
     fn test_cycle_detection() {
         let mut pipeline = Pipeline::new();
-        
+
         // A -> B -> A
-        pipeline.add_processor(Box::new(_MockProcessor { id: "A".into() }), vec![InputSource::connection("B", 0)]);
-        pipeline.add_processor(Box::new(_MockProcessor { id: "B".into() }), vec![InputSource::connection("A", 0)]);
+        pipeline.add_processor(
+            Box::new(_MockProcessor { id: "A".into() }),
+            vec![InputSource::connection("B", 0)],
+        );
+        pipeline.add_processor(
+            Box::new(_MockProcessor { id: "B".into() }),
+            vec![InputSource::connection("A", 0)],
+        );
 
         let result = pipeline.plan();
         assert!(matches!(result, Err(PipelineErrors::ComputingError(_))));
@@ -266,8 +295,11 @@ mod tests {
     #[test]
     fn test_unknown_processor_reference() {
         let mut pipeline = Pipeline::new();
-        
-        pipeline.add_processor(Box::new(_MockProcessor { id: "C".into() }), vec![InputSource::connection("A", 0)]);
+
+        pipeline.add_processor(
+            Box::new(_MockProcessor { id: "C".into() }),
+            vec![InputSource::connection("A", 0)],
+        );
 
         let result = pipeline.plan();
         assert!(matches!(result, Err(PipelineErrors::UnknownProcessor(_))));

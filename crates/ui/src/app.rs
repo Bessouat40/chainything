@@ -1,5 +1,5 @@
 use crate::bottom_panel::BottomPanel;
-use crate::dag_layout::{DAGLayout};
+use crate::dag_layout::DAGLayout;
 use crate::left_panel::LeftPanel;
 
 #[derive(Default)]

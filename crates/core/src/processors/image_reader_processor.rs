@@ -1,9 +1,9 @@
-use std::sync::Arc;
-use image::GenericImageView;
 use crate::processors::{
     base_processor::{Processor, ProcessorError},
     greyscale_processor::RawImage,
 };
+use image::GenericImageView;
+use std::sync::Arc;
 
 /// The `ImageReaderProcessor` loads an image file from the filesystem.
 ///
@@ -110,8 +110,9 @@ mod tests {
     #[test]
     fn test_file_not_found_fails() {
         let mut processor = ImageReaderProcessor::new("test".to_string());
-        let inputs: Vec<Arc<dyn std::any::Any + Send + Sync>> = vec![Arc::new("non_existent.jpg".to_string())];
-        
+        let inputs: Vec<Arc<dyn std::any::Any + Send + Sync>> =
+            vec![Arc::new("non_existent.jpg".to_string())];
+
         processor.set_input(inputs).unwrap();
         assert!(processor.process().is_err());
     }

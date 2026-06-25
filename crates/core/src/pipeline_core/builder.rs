@@ -1,7 +1,7 @@
 use serde::Deserialize;
 
-use crate::pipeline::pipeline::{InputSource, Pipeline, PipelineErrors};
-use crate::pipeline::registry::ProcessorRegistry;
+use crate::pipeline_core::pipeline::{InputSource, Pipeline, PipelineErrors};
+use crate::pipeline_core::registry::ProcessorRegistry;
 
 /// Defines the types of inputs possible for a pipeline node.
 ///
@@ -16,9 +16,7 @@ pub enum JsonInputDef {
         source_slot: usize,
     },
     /// A static value provided directly within the configuration.
-    Static {
-        value: String,
-    },
+    Static { value: String },
 }
 
 /// Represents the structure of a node in the JSON configuration.
@@ -67,10 +65,7 @@ impl PipelineBuilder {
 
         for node_def in def.nodes {
             let processor = registry
-                .build_processor(
-                    &node_def.node_type,
-                    node_def.id.clone(),
-                )
+                .build_processor(&node_def.node_type, node_def.id.clone())
                 .map_err(|e| PipelineErrors::ComputingError(format!("Registry error: {}", e)))?;
 
             let mut inputs = Vec::new();
@@ -97,8 +92,8 @@ impl PipelineBuilder {
 
 #[cfg(test)]
 mod tests {
-    use crate::pipeline::builder::PipelineBuilder;
-    use crate::pipeline::registry::ProcessorRegistry;
+    use crate::pipeline_core::builder::PipelineBuilder;
+    use crate::pipeline_core::registry::ProcessorRegistry;
 
     #[test]
     fn test_build_pipeline_from_json() {

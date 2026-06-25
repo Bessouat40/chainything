@@ -1,7 +1,9 @@
 use std::collections::HashMap;
 
 use crate::nodes::{
-    base_node::BaseNode, greyscale_node::GreyScaleNode, image_display_node::ImageDisplayNode, image_reader_node::ImageReaderNode, image_saver_node::ImageSaveNode, text_input_node::TextInputNode
+    base_node::BaseNode, greyscale_node::GreyScaleNode, image_display_node::ImageDisplayNode,
+    image_reader_node::ImageReaderNode, image_saver_node::ImageSaveNode,
+    text_input_node::TextInputNode,
 };
 
 pub struct NodeRegistry {

@@ -114,7 +114,11 @@ mod tests {
     use super::*;
 
     fn run(pixels: Vec<u8>) -> Vec<u8> {
-        let image = Arc::new(RawImage { width: 1, height: pixels.len() as u32 / 3, pixels });
+        let image = Arc::new(RawImage {
+            width: 1,
+            height: pixels.len() as u32 / 3,
+            pixels,
+        });
         let mut proc = GreyScaleProcessor::new("greyscale".into());
         proc.set_input(vec![image]).unwrap();
         proc.process().unwrap();
@@ -138,19 +142,28 @@ mod tests {
     #[test]
     fn test_process_without_input_returns_error() {
         let mut proc = GreyScaleProcessor::new("greyscale".into());
-        assert!(matches!(proc.process().unwrap_err(), ProcessorError::MissingInput(_)));
+        assert!(matches!(
+            proc.process().unwrap_err(),
+            ProcessorError::MissingInput(_)
+        ));
     }
 
     #[test]
     fn test_set_input_wrong_type_returns_error() {
         let mut proc = GreyScaleProcessor::new("greyscale".into());
         let bad: Arc<dyn std::any::Any + Send + Sync> = Arc::new(42u32);
-        assert!(matches!(proc.set_input(vec![bad]).unwrap_err(), ProcessorError::InvalidInput(_)));
+        assert!(matches!(
+            proc.set_input(vec![bad]).unwrap_err(),
+            ProcessorError::InvalidInput(_)
+        ));
     }
 
     #[test]
     fn test_set_input_empty_returns_error() {
         let mut proc = GreyScaleProcessor::new("greyscale".into());
-        assert!(matches!(proc.set_input(vec![]).unwrap_err(), ProcessorError::MissingInput(_)));
+        assert!(matches!(
+            proc.set_input(vec![]).unwrap_err(),
+            ProcessorError::MissingInput(_)
+        ));
     }
 }

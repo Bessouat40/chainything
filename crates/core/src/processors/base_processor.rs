@@ -103,18 +103,31 @@ mod tests {
 
     impl Adder {
         fn new() -> Self {
-            Self { a: None, b: None, result: None }
+            Self {
+                a: None,
+                b: None,
+                result: None,
+            }
         }
     }
 
     impl Processor for Adder {
-        fn id(&self) -> &str { "adder" }
+        fn id(&self) -> &str {
+            "adder"
+        }
 
-        fn set_input(&mut self, input: Vec<Arc<dyn Any + Send + Sync>>) -> Result<(), ProcessorError> {
-            self.a = Some(*input[0].downcast_ref::<i32>()
-                .ok_or_else(|| ProcessorError::InvalidInput("input[0]: expected i32".into()))?);
-            self.b = Some(*input[1].downcast_ref::<i32>()
-                .ok_or_else(|| ProcessorError::InvalidInput("input[1]: expected i32".into()))?);
+        fn set_input(
+            &mut self,
+            input: Vec<Arc<dyn Any + Send + Sync>>,
+        ) -> Result<(), ProcessorError> {
+            self.a =
+                Some(*input[0].downcast_ref::<i32>().ok_or_else(|| {
+                    ProcessorError::InvalidInput("input[0]: expected i32".into())
+                })?);
+            self.b =
+                Some(*input[1].downcast_ref::<i32>().ok_or_else(|| {
+                    ProcessorError::InvalidInput("input[1]: expected i32".into())
+                })?);
             Ok(())
         }
 
@@ -123,8 +136,12 @@ mod tests {
         }
 
         fn process(&mut self) -> Result<(), ProcessorError> {
-            let a = self.a.ok_or_else(|| ProcessorError::MissingInput("a".into()))?;
-            let b = self.b.ok_or_else(|| ProcessorError::MissingInput("b".into()))?;
+            let a = self
+                .a
+                .ok_or_else(|| ProcessorError::MissingInput("a".into()))?;
+            let b = self
+                .b
+                .ok_or_else(|| ProcessorError::MissingInput("b".into()))?;
             self.result = Some(a + b);
             Ok(())
         }
@@ -133,7 +150,9 @@ mod tests {
     #[test]
     fn test_process_happy_path() {
         let mut adder = Adder::new();
-        adder.set_input(vec![Arc::new(3i32), Arc::new(4i32)]).unwrap();
+        adder
+            .set_input(vec![Arc::new(3i32), Arc::new(4i32)])
+            .unwrap();
         Processor::process(&mut adder).unwrap();
 
         let output = adder.get_output();
@@ -143,13 +162,18 @@ mod tests {
     #[test]
     fn test_process_without_input_returns_missing_input_error() {
         let mut adder = Adder::new();
-        assert!(matches!(Processor::process(&mut adder).unwrap_err(), ProcessorError::MissingInput(_)));
+        assert!(matches!(
+            Processor::process(&mut adder).unwrap_err(),
+            ProcessorError::MissingInput(_)
+        ));
     }
 
     #[test]
     fn test_processor_base_via_blanket_impl() {
         let mut adder: Box<dyn ProcessorBase> = Box::new(Adder::new());
-        adder.set_input_erased(vec![Arc::new(10i32), Arc::new(5i32)]).unwrap();
+        adder
+            .set_input_erased(vec![Arc::new(10i32), Arc::new(5i32)])
+            .unwrap();
         adder.process().unwrap();
 
         let output = adder.get_output_erased();

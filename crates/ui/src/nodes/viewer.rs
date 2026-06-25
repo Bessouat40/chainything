@@ -26,7 +26,7 @@ impl DemoViewer {
 impl SnarlViewer<Box<dyn BaseNode>> for DemoViewer {
     fn connect(&mut self, from: &OutPin, to: &InPin, snarl: &mut Snarl<Box<dyn BaseNode>>) {
         if !to.remotes.is_empty() {
-            return; 
+            return;
         }
         let out_pin_idx = from.id.output;
         let in_pin_idx = to.id.input;

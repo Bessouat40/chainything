@@ -7,7 +7,7 @@ use std::{any::Any, sync::Arc};
 /// The `ImageSaveProcessor` saves a `RawImage` to the filesystem.
 ///
 /// ### Input
-/// * Expects two inputs: 
+/// * Expects two inputs:
 ///   1. `Arc<RawImage>` (the image data).
 ///   2. `Arc<String>` (the file path to save to).
 ///
@@ -45,7 +45,8 @@ impl Processor for ImageSaveProcessor {
         if inputs.len() < 2 {
             return Err(ProcessorError::MissingInput(format!(
                 "Processor {} requires 2 inputs (RawImage, path), got {}",
-                self.id(), inputs.len()
+                self.id(),
+                inputs.len()
             )));
         }
 
@@ -68,13 +69,15 @@ impl Processor for ImageSaveProcessor {
     }
 
     fn process(&mut self) -> Result<(), ProcessorError> {
-        let input = self.input.as_ref().ok_or_else(|| {
-            ProcessorError::MissingInput("Missing image input".to_string())
-        })?;
+        let input = self
+            .input
+            .as_ref()
+            .ok_or_else(|| ProcessorError::MissingInput("Missing image input".to_string()))?;
 
-        let output_path = self.output_path.as_ref().ok_or_else(|| {
-            ProcessorError::MissingInput("Missing output path".to_string())
-        })?;
+        let output_path = self
+            .output_path
+            .as_ref()
+            .ok_or_else(|| ProcessorError::MissingInput("Missing output path".to_string()))?;
 
         image::save_buffer(
             output_path.as_str(),
@@ -102,7 +105,8 @@ mod tests {
     #[test]
     fn test_invalid_input_types_fails() {
         let mut processor = ImageSaveProcessor::new("save_test".to_string());
-        let inputs: Vec<Arc<dyn Any + Send + Sync>> = vec![Arc::new("path".to_string()), Arc::new(10)];
+        let inputs: Vec<Arc<dyn Any + Send + Sync>> =
+            vec![Arc::new("path".to_string()), Arc::new(10)];
         assert!(processor.set_input(inputs).is_err());
     }
 
