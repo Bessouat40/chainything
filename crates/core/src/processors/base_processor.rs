@@ -1,9 +1,12 @@
-use std::{any::{Any}, sync::Arc};
+use std::{any::Any, sync::Arc};
 
 pub trait ProcessorBase: Send + Sync + 'static {
     fn id(&self) -> &str;
-    
-    fn set_input_erased(&mut self, input: Vec<Arc<dyn Any + Send + Sync>>) -> Result<(), ProcessorError>;
+
+    fn set_input_erased(
+        &mut self,
+        input: Vec<Arc<dyn Any + Send + Sync>>,
+    ) -> Result<(), ProcessorError>;
     fn get_output_erased(&self) -> Vec<Arc<dyn Any + Send + Sync>>;
     fn process(&mut self) -> Result<(), ProcessorError>;
 }
@@ -17,12 +20,14 @@ pub trait Processor: Send + Sync + 'static {
 }
 
 impl<T: Processor> ProcessorBase for T {
-
     fn id(&self) -> &str {
         Processor::id(self)
     }
 
-    fn set_input_erased(&mut self, input: Vec<Arc<dyn Any + Send + Sync>>) -> Result<(), ProcessorError> {
+    fn set_input_erased(
+        &mut self,
+        input: Vec<Arc<dyn Any + Send + Sync>>,
+    ) -> Result<(), ProcessorError> {
         self.set_input(input)
     }
 

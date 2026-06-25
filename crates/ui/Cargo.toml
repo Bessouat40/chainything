@@ -1,13 +1,16 @@
 [package]
-name = "perso"
+name = "ui"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
 chainything = { path = "../core" }
+dyn-clone = "1.0.20"
 eframe = "0.34.3"
 egui = "0.34.3"
 egui-snarl = "0.10.0"
+egui_extras = { version = "0.34.3", features = ["default", "all_loaders"] }
+image = { version = "0.25", features = ["png", "jpeg"] }
 env_logger = "0.11.10"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"

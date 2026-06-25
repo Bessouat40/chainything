@@ -2,24 +2,21 @@ use std::collections::HashMap;
 
 use crate::nodes::base_node::{BaseNode, InputOutputType, STRING_COLOR};
 
-use egui::{Color32, Ui};
+use egui::Ui;
 use egui_snarl::{
-    InPin, InPinId, NodeId, OutPin, OutPinId, Snarl,
-    ui::{
-        AnyPins, PinInfo, SnarlViewer,
-        WireStyle,
-    },
+    InPin, OutPin,
+    ui::{PinInfo, WireStyle},
 };
 
 #[derive(Clone)]
-pub struct TextInputNode{
-    value: String,
+pub struct TextInputNode {
+    value: Vec<InputOutputType>,
 }
 
 impl TextInputNode {
     pub fn new() -> Self {
         Self {
-            value: String::new(),
+            value: vec![InputOutputType::String("".to_string())],
         }
     }
 }
@@ -27,6 +24,10 @@ impl TextInputNode {
 impl BaseNode for TextInputNode {
     fn name(&self) -> &str {
         "TextInputNode"
+    }
+
+    fn get_value(&self) -> Option<&Vec<InputOutputType>> {
+        Some(&self.value)
     }
 
     fn inputs_count(&self) -> usize {
@@ -42,26 +43,28 @@ impl BaseNode for TextInputNode {
     }
 
     fn mapping_output(&self) -> Option<HashMap<usize, InputOutputType>> {
-        Some(HashMap::from([(0, InputOutputType::String("".to_string()))]))
+        Some(HashMap::from([(
+            0,
+            InputOutputType::String("".to_string()),
+        )]))
     }
 
-    fn show_input(&mut self, pin: &InPin, ui: &mut Ui) -> PinInfo {
-        unreachable!("TextInputProcessor node has no inputs")
-
+    fn show_input(&mut self, _pin: &InPin, _ui: &mut Ui) -> PinInfo {
+        PinInfo::circle()
     }
 
-    fn show_output(&mut self, pin: &OutPin, ui: &mut Ui) -> PinInfo {
-        assert_eq!(pin.id.output, 0, "TextInputProcessor node has only one output");
-
+    fn show_output(&mut self, _pin: &OutPin, ui: &mut Ui) -> PinInfo {
         ui.with_layout(egui::Layout::top_down(egui::Align::Max), |ui| {
-            ui.label("Output String:");
-            
-            let edit = egui::TextEdit::singleline(&mut self.value)
-                .text_color(STRING_COLOR)
-                .desired_width(120.0) 
-                .font(egui::TextStyle::Monospace);
-            
-            ui.add(edit);
+            ui.label("Valeur :");
+
+            if let InputOutputType::String(ref mut val) = self.value[0] {
+                ui.add(
+                    egui::TextEdit::singleline(val)
+                        .text_color(STRING_COLOR)
+                        .desired_width(120.0)
+                        .font(egui::TextStyle::Monospace),
+                );
+            }
         });
 
         PinInfo::circle()

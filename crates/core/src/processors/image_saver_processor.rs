@@ -1,5 +1,8 @@
+use crate::processors::{
+    base_processor::{Processor, ProcessorError},
+    greyscale_processor::RawImage,
+};
 use std::{any::Any, sync::Arc};
-use crate::processors::{base_processor::{Processor, ProcessorError}, greyscale_processor::RawImage};
 
 pub struct ImageSaveProcessor {
     id: String,
@@ -18,24 +21,26 @@ impl ImageSaveProcessor {
 }
 
 impl Processor for ImageSaveProcessor {
-
     fn id(&self) -> &str {
         &self.id
     }
 
-    fn set_input(&mut self, mut inputs: Vec<Arc<dyn Any + Send + Sync>>) -> Result<(), ProcessorError> {
+    fn set_input(
+        &mut self,
+        mut inputs: Vec<Arc<dyn Any + Send + Sync>>,
+    ) -> Result<(), ProcessorError> {
         if inputs.is_empty() {
             return Err(ProcessorError::MissingInput(format!(
-                "Processor {} requires 2 inputs (RawImage, path), got 0", 
+                "Processor {} requires 2 inputs (RawImage, path), got 0",
                 self.id()
             )));
         }
-        
+
         let first_input = inputs.remove(0);
-        
+
         if let Ok(typed_image) = first_input.downcast::<RawImage>() {
             self.input = Some(typed_image);
-            
+
             let second_input = inputs.remove(0);
 
             if let Ok(typed_path) = second_input.downcast::<String>() {
@@ -43,13 +48,13 @@ impl Processor for ImageSaveProcessor {
                 Ok(())
             } else {
                 Err(ProcessorError::InvalidInput(format!(
-                    "Invalid second input type (expected String) for processor {}", 
+                    "Invalid second input type (expected String) for processor {}",
                     self.id()
                 )))
             }
         } else {
             Err(ProcessorError::InvalidInput(format!(
-                "Invalid input type (expected RawImage) for processor {}", 
+                "Invalid input type (expected RawImage) for processor {}",
                 self.id()
             )))
         }
@@ -61,21 +66,27 @@ impl Processor for ImageSaveProcessor {
 
     fn process(&mut self) -> Result<(), ProcessorError> {
         let input = self.input.as_ref().ok_or_else(|| {
-            ProcessorError::MissingInput(format!("No input provided before running process on {}", self.id()))
+            ProcessorError::MissingInput(format!(
+                "No input provided before running process on {}",
+                self.id()
+            ))
         })?;
 
         let output_path = self.output_path.as_ref().ok_or_else(|| {
-            ProcessorError::MissingInput(format!("No output path provided before running process on {}", self.id()))
+            ProcessorError::MissingInput(format!(
+                "No output path provided before running process on {}",
+                self.id()
+            ))
         })?;
 
         image::save_buffer(
-            &output_path.as_ref(), 
-            &input.pixels, 
-            input.width, 
-            input.height, 
-            image::ColorType::L8
-        ).expect("An error occured trying to save your image...");
-
+            &output_path.as_ref(),
+            &input.pixels,
+            input.width,
+            input.height,
+            image::ColorType::L8,
+        )
+        .expect("An error occured trying to save your image...");
 
         Ok(())
     }

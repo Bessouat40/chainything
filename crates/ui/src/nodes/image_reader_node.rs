@@ -2,15 +2,13 @@ use std::collections::HashMap;
 
 use crate::nodes::base_node::{BaseNode, InputOutputType, STRING_COLOR};
 
-use egui::{Color32, Ui};
+use egui::Ui;
 use egui_snarl::{
-    InPin, InPinId, NodeId, OutPin, OutPinId, Snarl,
-    ui::{
-        AnyPins, PinInfo, SnarlViewer,
-        WireStyle,
-    },
+    InPin, OutPin,
+    ui::{PinInfo, WireStyle},
 };
 
+#[derive(Clone)]
 pub struct ImageReaderNode;
 
 impl ImageReaderNode {
@@ -24,6 +22,10 @@ impl BaseNode for ImageReaderNode {
         "ImageReaderNode"
     }
 
+    fn get_value(&self) -> Option<&Vec<InputOutputType>> {
+        None
+    }
+
     fn inputs_count(&self) -> usize {
         1
     }
@@ -33,17 +35,20 @@ impl BaseNode for ImageReaderNode {
     }
 
     fn mapping_input(&self) -> Option<HashMap<usize, InputOutputType>> {
-        Some(HashMap::from([(0, InputOutputType::String("".to_string()))]))
+        Some(HashMap::from([(
+            0,
+            InputOutputType::String("".to_string()),
+        )]))
     }
 
     fn mapping_output(&self) -> Option<HashMap<usize, InputOutputType>> {
         Some(HashMap::from([(0, InputOutputType::RawImage(None))]))
     }
 
-    fn show_input(&mut self, pin: &InPin, ui: &mut Ui) -> PinInfo {
+    fn show_input(&mut self, _pin: &InPin, ui: &mut Ui) -> PinInfo {
         ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |ui| {
             ui.label("Input String");
-            
+
             ui.add_space(5.0);
         });
 
@@ -54,10 +59,10 @@ impl BaseNode for ImageReaderNode {
             })
     }
 
-    fn show_output(&mut self, pin: &OutPin, ui: &mut Ui) -> PinInfo {
+    fn show_output(&mut self, _pin: &OutPin, ui: &mut Ui) -> PinInfo {
         ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |ui| {
             ui.label("Output Raw Image");
-            
+
             ui.add_space(5.0);
         });
 

@@ -1,11 +1,9 @@
-use std::collections::HashMap;
 use serde_json::Value;
+use std::collections::HashMap;
 
 use crate::processors::{
-    base_processor::ProcessorBase, 
-    greyscale_processor::GreyScaleProcessor, 
-    image_reader_processor::ImageReaderProcessor, 
-    image_saver_processor::ImageSaveProcessor
+    base_processor::ProcessorBase, greyscale_processor::GreyScaleProcessor,
+    image_reader_processor::ImageReaderProcessor, image_saver_processor::ImageSaveProcessor,
 };
 
 type ProcessorConstructor = Box<dyn Fn(String, Value) -> Result<Box<dyn ProcessorBase>, String>>;
@@ -24,20 +22,20 @@ impl ProcessorRegistry {
     /// Registers a new processor constructor under a specific node type name.
     ///
     /// This method takes a closure that defines how to construct the processor. The closure
-    /// receives a unique `id` and any JSON `params` (from `serde_json::Value`) required for 
+    /// receives a unique `id` and any JSON `params` (from `serde_json::Value`) required for
     /// initialization, allowing each processor to parse its own specific configuration.
     ///
     /// # Arguments
     ///
     /// * `node_type` - A string slice representing the name/type of the node (e.g., "InvertColor").
-    /// * `constructor` - A closure that takes an `id` (`String`) and `params` (`Value`) and returns 
+    /// * `constructor` - A closure that takes an `id` (`String`) and `params` (`Value`) and returns
     ///   a `Result` containing the boxed `ProcessorBase`.
     ///
     /// # Example
     ///
     /// ```rust
     /// let mut registry = ProcessorRegistry::new();
-    /// 
+    ///
     /// registry.register("InvertColor", |id| {
     ///     Ok(Box::new(InvertColorProcessor::new(id)))
     /// });
@@ -46,16 +44,21 @@ impl ProcessorRegistry {
     where
         F: Fn(String, Value) -> Result<Box<dyn ProcessorBase>, String> + 'static,
     {
-        self.constructors.insert(
-            node_type.to_string(),
-            Box::new(constructor),
-        );
+        self.constructors
+            .insert(node_type.to_string(), Box::new(constructor));
     }
 
-    pub fn build_processor(&self, node_type: &str, id: String, params: Value) -> Result<Box<dyn ProcessorBase>, String> {
-        let constructor = self.constructors.get(node_type)
+    pub fn build_processor(
+        &self,
+        node_type: &str,
+        id: String,
+        params: Value,
+    ) -> Result<Box<dyn ProcessorBase>, String> {
+        let constructor = self
+            .constructors
+            .get(node_type)
             .ok_or_else(|| format!("Unknown processor type: '{}'", node_type))?;
-        
+
         constructor(id, params)
     }
 
@@ -65,11 +68,11 @@ impl ProcessorRegistry {
         registry.register("ImageReader", |id, _params| {
             Ok(Box::new(ImageReaderProcessor::new(id)) as Box<dyn ProcessorBase>)
         });
-        
+
         registry.register("Greyscale", |id, _params| {
             Ok(Box::new(GreyScaleProcessor::new(id)) as Box<dyn ProcessorBase>)
         });
-        
+
         registry.register("ImageSave", |id, _params| {
             Ok(Box::new(ImageSaveProcessor::new(id)) as Box<dyn ProcessorBase>)
         });

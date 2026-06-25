@@ -1,21 +1,15 @@
 #![allow(clippy::use_self)]
 
-use crate::nodes::node::MyNode;
-use crate::nodes::node_registry::NodeRegistry;
 use crate::nodes::base_node::BaseNode;
+use crate::nodes::node_registry::NodeRegistry;
 
 use std::mem::discriminant;
 
-use egui::{Color32, Ui};
+use egui::Ui;
 use egui_snarl::{
-    InPin, InPinId, NodeId, OutPin, OutPinId, Snarl,
-    ui::{
-        AnyPins, PinInfo, SnarlViewer,
-        WireStyle,
-    },
+    InPin, NodeId, OutPin, Snarl,
+    ui::{AnyPins, PinInfo, SnarlViewer},
 };
-
-const STRING_COLOR: Color32 = Color32::from_rgb(0x00, 0xb0, 0x00);
 
 pub struct DemoViewer {
     pub node_registry: NodeRegistry,
@@ -30,24 +24,21 @@ impl DemoViewer {
 }
 
 impl SnarlViewer<Box<dyn BaseNode>> for DemoViewer {
-    
     fn connect(&mut self, from: &OutPin, to: &InPin, snarl: &mut Snarl<Box<dyn BaseNode>>) {
-        
         let out_pin_idx = from.id.output;
         let in_pin_idx = to.id.input;
 
-        let from_node = self.node_registry.get_node(&snarl[from.id.node]);
-        let to_node = self.node_registry.get_node(&snarl[to.id.node]);
+        let from_node = &snarl[from.id.node];
+        let to_node = &snarl[to.id.node];
 
-        if from_node.is_none() || to_node.is_none() {
-            return;
-        }
-
-        if from_node.unwrap().mapping_output().is_some() & to_node.unwrap().mapping_input().is_some() {
-            let from_output_type = from_node.unwrap().mapping_output().unwrap();
-            let to_input_type = to_node.unwrap().mapping_input().unwrap();
-            if discriminant(from_output_type.get(&out_pin_idx).unwrap()) == discriminant(to_input_type.get(&in_pin_idx).unwrap()) {
-                snarl.connect(from.id, to.id);
+        if let (Some(out_map), Some(in_map)) = (from_node.mapping_output(), to_node.mapping_input())
+        {
+            if let (Some(out_type), Some(in_type)) =
+                (out_map.get(&out_pin_idx), in_map.get(&in_pin_idx))
+            {
+                if discriminant(out_type) == discriminant(in_type) {
+                    snarl.connect(from.id, to.id);
+                }
             }
         }
     }
@@ -65,60 +56,69 @@ impl SnarlViewer<Box<dyn BaseNode>> for DemoViewer {
     }
 
     #[allow(refining_impl_trait)]
-    fn show_input(&mut self, pin: &InPin, ui: &mut Ui, snarl: &mut Snarl<Box<dyn BaseNode>>) -> PinInfo {
+    fn show_input(
+        &mut self,
+        pin: &InPin,
+        ui: &mut Ui,
+        snarl: &mut Snarl<Box<dyn BaseNode>>,
+    ) -> PinInfo {
         snarl[pin.id.node].show_input(pin, ui)
     }
 
     #[allow(refining_impl_trait)]
-    fn show_output(&mut self, pin: &OutPin, ui: &mut Ui, snarl: &mut Snarl<Box<dyn BaseNode>>) -> PinInfo {
+    fn show_output(
+        &mut self,
+        pin: &OutPin,
+        ui: &mut Ui,
+        snarl: &mut Snarl<Box<dyn BaseNode>>,
+    ) -> PinInfo {
         snarl[pin.id.node].show_output(pin, ui)
     }
 
-    // fn show_body(
-    //     &mut self,
-    //     node: NodeId,
-    //     inputs: &[InPin],
-    //     _outputs: &[OutPin],
-    //     ui: &mut Ui,
-    //     snarl: &mut Snarl<Box<dyn BaseNode>>,
-    // ) {
-    //     if let MyNode::ImageDisplay(_) = snarl[node] {
-    //         ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
-    //             ui.set_width(200.0);
-    //             let input = &inputs[0];
-    //             let url_to_display = match input.remotes.as_slice() {
-    //                 [remote] => {
-    //                     Some(snarl[remote.node].string_in().clone())
-    //                 }
-    //                 _ => None,
-    //             };
+    #[inline]
+    fn has_body(&mut self, node: &Box<dyn BaseNode>) -> bool {
+        node.has_body()
+    }
 
-    //             if let Some(uri) = url_to_display {
-    //                 ui.add(
-    //                     egui::Image::new(&uri)
-    //                         .show_loading_spinner(true)
-    //                 );
-    //             } else {
-    //                 ui.label("No image to display");
-    //             }
-    //         });
-    //     }
-    // }
+    fn show_body(
+        &mut self,
+        node: NodeId,
+        inputs: &[InPin],
+        outputs: &[OutPin],
+        ui: &mut Ui,
+        snarl: &mut Snarl<Box<dyn BaseNode>>,
+    ) {
+        let snarl_ref = &*snarl;
+        let base_node = &snarl_ref[node];
+
+        base_node.show_body(node, inputs, outputs, ui, snarl_ref);
+    }
 
     fn has_graph_menu(&mut self, _pos: egui::Pos2, _snarl: &mut Snarl<Box<dyn BaseNode>>) -> bool {
         true
     }
 
-    // fn show_graph_menu(&mut self, pos: egui::Pos2, ui: &mut Ui, snarl: &mut Snarl<Box<dyn BaseNode>>) {
-    //     for node in &self.node_registry.nodes {
-    //         if ui.button(node.1.name()).clicked() {
-    //             snarl.insert_node(pos, node.1.new());
-    //             ui.close();
-    //         }
-    //     }
-    // }
+    fn show_graph_menu(
+        &mut self,
+        pos: egui::Pos2,
+        ui: &mut Ui,
+        snarl: &mut Snarl<Box<dyn BaseNode>>,
+    ) {
+        for name in self.node_registry.get_available_nodes() {
+            if ui.button(name).clicked() {
+                let node = self.node_registry.create_node(name);
+                if let Some(created_node) = node {
+                    snarl.insert_node(pos, created_node);
+                }
+            }
+        }
+    }
 
-    fn has_dropped_wire_menu(&mut self, _src_pins: AnyPins, _snarl: &mut Snarl<Box<dyn BaseNode>>) -> bool {
+    fn has_dropped_wire_menu(
+        &mut self,
+        _src_pins: AnyPins,
+        _snarl: &mut Snarl<Box<dyn BaseNode>>,
+    ) -> bool {
         true
     }
 
@@ -230,7 +230,7 @@ impl SnarlViewer<Box<dyn BaseNode>> for DemoViewer {
         _outputs: &[OutPin],
         snarl: &Snarl<Box<dyn BaseNode>>,
     ) -> egui::Frame {
-        let get_node = self.node_registry.get_node(&snarl[node]).unwrap();
+        let get_node = &snarl[node];
         get_node.header_frame(frame)
     }
 }
