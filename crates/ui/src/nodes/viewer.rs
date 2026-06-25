@@ -26,7 +26,7 @@ impl DemoViewer {
 impl SnarlViewer<Box<dyn BaseNode>> for DemoViewer {
     fn connect(&mut self, from: &OutPin, to: &InPin, snarl: &mut Snarl<Box<dyn BaseNode>>) {
         if !to.remotes.is_empty() {
-            return; 
+            return;
         }
         let out_pin_idx = from.id.output;
         let in_pin_idx = to.id.input;
@@ -35,14 +35,11 @@ impl SnarlViewer<Box<dyn BaseNode>> for DemoViewer {
         let to_node = &snarl[to.id.node];
 
         if let (Some(out_map), Some(in_map)) = (from_node.mapping_output(), to_node.mapping_input())
-        {
-            if let (Some(out_type), Some(in_type)) =
+            && let (Some(out_type), Some(in_type)) =
                 (out_map.get(&out_pin_idx), in_map.get(&in_pin_idx))
-            {
-                if discriminant(out_type) == discriminant(in_type) {
-                    snarl.connect(from.id, to.id);
-                }
-            }
+            && discriminant(out_type) == discriminant(in_type)
+        {
+            snarl.connect(from.id, to.id);
         }
     }
 

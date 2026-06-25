@@ -61,7 +61,7 @@ impl BaseNode for ImageSaveNode {
         });
 
         let pin_color = if pin.id.input == 0 {
-            egui::Color32::from_rgb(100, 200, 100) 
+            egui::Color32::from_rgb(100, 200, 100)
         } else {
             STRING_COLOR
         };
@@ -92,5 +92,6 @@ impl BaseNode for ImageSaveNode {
         _outputs: &[OutPin],
         _ui: &mut Ui,
         _snarl: &Snarl<Box<dyn BaseNode>>,
-    ) {}
+    ) {
+    }
 }

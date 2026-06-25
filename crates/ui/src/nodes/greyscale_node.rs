@@ -24,7 +24,7 @@ impl BaseNode for GreyScaleNode {
     fn get_value(&self) -> Option<&Vec<InputOutputType>> {
         None
     }
-    
+
     fn is_processor(&self) -> bool {
         true
     }

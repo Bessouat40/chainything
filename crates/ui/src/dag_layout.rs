@@ -1,6 +1,6 @@
 use crate::nodes::base_node::InputOutputType;
-use crate::nodes::{base_node::BaseNode, node_registry::NodeRegistry};
 use crate::nodes::viewer::DemoViewer;
+use crate::nodes::{base_node::BaseNode, node_registry::NodeRegistry};
 use crate::payload_parser::{GraphPayload, InputPayload, NodePayload};
 use egui::Ui;
 use egui_snarl::{Snarl, ui::SnarlWidget};
@@ -62,7 +62,10 @@ pub fn generate_payload(snarl: &Snarl<Box<dyn BaseNode>>) -> GraphPayload {
         let current_node_str_id = id_map.get(&n_id).unwrap().clone();
 
         for input_idx in 0..node.inputs_count() {
-            let in_pin_id = egui_snarl::InPinId { node: n_id, input: input_idx };
+            let in_pin_id = egui_snarl::InPinId {
+                node: n_id,
+                input: input_idx,
+            };
             let in_pin = snarl.in_pin(in_pin_id);
 
             if let Some(out_pin) = in_pin.remotes.first() {
@@ -78,7 +81,13 @@ pub fn generate_payload(snarl: &Snarl<Box<dyn BaseNode>>) -> GraphPayload {
                     let value = source_node
                         .get_value()
                         .and_then(|vals| vals.get(out_pin.output))
-                        .and_then(|v| if let InputOutputType::String(s) = v { Some(s.clone()) } else { None })
+                        .and_then(|v| {
+                            if let InputOutputType::String(s) = v {
+                                Some(s.clone())
+                            } else {
+                                None
+                            }
+                        })
                         .map(serde_json::Value::String)
                         .unwrap_or(serde_json::Value::Null);
 
@@ -94,7 +103,6 @@ pub fn generate_payload(snarl: &Snarl<Box<dyn BaseNode>>) -> GraphPayload {
         payload.nodes.push(NodePayload {
             id: current_node_str_id,
             node_type: node.name().replace("Node", ""),
-            parameters: serde_json::json!({}),
             inputs: inputs_payload,
         });
     }
