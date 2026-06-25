@@ -1,5 +1,11 @@
 # Chainything
 
+[![Crates.io](https://img.shields.io/crates/v/chainything.svg)](https://crates.io/crates/chainything)
+[![docs.rs](https://docs.rs/chainything/badge.svg)](https://docs.rs/chainything)
+[![ci](https://github.com/Bessouat40/chainything/actions/workflows/ci.yml/badge.svg)](https://github.com/Bessouat40/chainything/actions)
+
+![Chainything UI](./media/ui.png)
+
 Chainything is a Directed Acyclic Graph (DAG) based pipeline execution engine written in Rust.
 
 It allows you to easily chain complex operations (like image processing, data transformation, etc.) in a modular way. The engine automatically calculates the optimal execution order and handles data transfer between different nodes (processors) while maintaining strong typing for the developer.
@@ -19,8 +25,6 @@ It allows you to easily chain complex operations (like image processing, data tr
 ### Visual Node Editor
 
 Here's what the UI looks like in action:
-
-![Chainything UI](./media/ui.png)
 
 ### Programmatic Usage
 
