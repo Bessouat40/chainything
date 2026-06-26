@@ -1,8 +1,11 @@
 pub mod base_node;
+pub mod blur_node;
 pub mod greyscale_node;
 pub mod image_display_node;
 pub mod image_reader_node;
 pub mod image_saver_node;
 pub mod node_registry;
+pub mod resize_node;
 pub mod text_input_node;
+pub mod threshold_node;
 pub mod viewer;

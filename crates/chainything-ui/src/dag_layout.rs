@@ -43,6 +43,10 @@ impl DAGLayout {
 
 use std::collections::HashMap;
 
+fn get_node_parameter(node: &Box<dyn BaseNode>, input_idx: usize) -> Option<String> {
+    node.get_parameter(input_idx)
+}
+
 pub fn generate_payload(snarl: &Snarl<Box<dyn BaseNode>>) -> GraphPayload {
     let mut payload = GraphPayload { nodes: Vec::new() };
     let mut id_map = HashMap::new();
@@ -94,9 +98,26 @@ pub fn generate_payload(snarl: &Snarl<Box<dyn BaseNode>>) -> GraphPayload {
                     inputs_payload.push(InputPayload::Value { value });
                 }
             } else {
-                inputs_payload.push(InputPayload::Value {
-                    value: serde_json::Value::Null,
-                });
+                let value = get_node_parameter(node, input_idx)
+                    .map(serde_json::Value::String)
+                    .unwrap_or(serde_json::Value::Null);
+                inputs_payload.push(InputPayload::Value { value });
+            }
+        }
+
+        let mut params = None;
+        if let Some(param_value) = node.get_parameter(0) {
+            let mut params_map = HashMap::new();
+            params_map.insert("param_0".to_string(), serde_json::Value::String(param_value));
+
+            let mut idx = 1;
+            while let Some(param_value) = node.get_parameter(idx) {
+                params_map.insert(format!("param_{}", idx), serde_json::Value::String(param_value));
+                idx += 1;
+            }
+
+            if !params_map.is_empty() {
+                params = Some(params_map);
             }
         }
 
@@ -104,6 +125,7 @@ pub fn generate_payload(snarl: &Snarl<Box<dyn BaseNode>>) -> GraphPayload {
             id: current_node_str_id,
             node_type: node.name().replace("Node", ""),
             inputs: inputs_payload,
+            params,
         });
     }
     payload
