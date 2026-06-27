@@ -98,7 +98,7 @@ pub fn generate_payload(snarl: &Snarl<Box<dyn BaseNode>>) -> GraphPayload {
                     inputs_payload.push(InputPayload::Value { value });
                 }
             } else {
-                let value = get_node_parameter(node, input_idx)
+                let value = get_node_parameter(node.as_ref(), input_idx)
                     .map(serde_json::Value::String)
                     .unwrap_or(serde_json::Value::Null);
                 inputs_payload.push(InputPayload::Value { value });
