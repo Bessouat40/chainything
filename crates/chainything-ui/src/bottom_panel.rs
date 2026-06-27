@@ -66,7 +66,6 @@ impl BottomPanel {
 }
 
 fn execute_pipeline(json_data: &str) {
-    println!("{:?}", json_data);
     let registry = ProcessorRegistry::with_standard_processors();
 
     match PipelineBuilder::build_from_json(json_data, &registry) {
