@@ -113,6 +113,14 @@ impl DAGLayout {
         self.bindings.clear();
     }
 
+    /// Removes every node and connection, resetting the editor to an empty graph.
+    pub fn clear_graph(&mut self) {
+        self.snarl = Snarl::new();
+        // The previous run's display bindings reference nodes that no longer
+        // exist; drop them so stale results aren't routed into the empty graph.
+        self.bindings.clear();
+    }
+
     /// `true` while a pipeline run is in progress on the background thread.
     pub fn is_running(&self) -> bool {
         *self.running.lock().unwrap()

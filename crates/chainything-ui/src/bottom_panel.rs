@@ -87,6 +87,27 @@ impl BottomPanel {
                     {
                         dag_layout.save_graph_to_file();
                     }
+
+                    ui.add_space(8.0);
+
+                    let clear_btn = Button::new(
+                        RichText::new("🗑 Clear")
+                            .size(13.0)
+                            .color(Color32::from_rgb(235, 225, 225))
+                            .strong(),
+                    )
+                    .fill(Color32::from_rgb(120, 60, 60))
+                    .corner_radius(8.0)
+                    .min_size(Vec2::new(100.0, 38.0));
+
+                    if ui
+                        .add_enabled(!is_running, clear_btn)
+                        .on_hover_cursor(egui::CursorIcon::PointingHand)
+                        .on_hover_text("Remove all nodes and connections")
+                        .clicked()
+                    {
+                        dag_layout.clear_graph();
+                    }
                 });
             });
     }
