@@ -127,4 +127,20 @@ impl BaseNode for ResizeNode {
             _ => None,
         }
     }
+
+    fn set_parameter(&mut self, index: usize, value: &str) {
+        match index {
+            0 => {
+                if let Ok(v) = value.parse::<u32>() {
+                    self.width.set(v);
+                }
+            }
+            1 => {
+                if let Ok(v) = value.parse::<u32>() {
+                    self.height.set(v);
+                }
+            }
+            _ => {}
+        }
+    }
 }

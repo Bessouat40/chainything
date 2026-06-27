@@ -112,4 +112,10 @@ impl BaseNode for OllamaLoaderNode {
             _ => None,
         }
     }
+
+    fn set_parameter(&mut self, index: usize, value: &str) {
+        if index == 0 {
+            *self.model.borrow_mut() = value.to_string();
+        }
+    }
 }

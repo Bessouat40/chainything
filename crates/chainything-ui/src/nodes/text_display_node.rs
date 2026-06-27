@@ -96,6 +96,21 @@ impl BaseNode for TextDisplayNode {
         frame.fill(egui::Color32::from_rgb(40, 55, 40))
     }
 
+    fn get_parameter(&self, index: usize) -> Option<String> {
+        match index {
+            0 => Some(self.path_input.borrow().clone()),
+            _ => None,
+        }
+    }
+
+    fn set_parameter(&mut self, index: usize, value: &str) {
+        if index == 0 {
+            *self.path_input.borrow_mut() = value.to_string();
+            // Force a re-read of the file on next render in standalone mode.
+            *self.loaded_path.borrow_mut() = "\0".to_string();
+        }
+    }
+
     fn set_display(&self, data: DisplayData) {
         if let DisplayData::Text(text) = data {
             *self.piped.borrow_mut() = Some(text);
