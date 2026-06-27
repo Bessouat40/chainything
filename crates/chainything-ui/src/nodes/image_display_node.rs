@@ -2,7 +2,7 @@ use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use crate::nodes::base_node::{BaseNode, DisplayData, InputOutputType, STRING_COLOR};
+use crate::nodes::base_node::{BaseNode, DisplayData, InputOutputType, NodeCategory, STRING_COLOR};
 
 use chainything::processors::greyscale_processor::RawImage;
 use egui::Ui;
@@ -82,6 +82,10 @@ fn color_image_from_raw(image: &RawImage) -> egui::ColorImage {
 impl BaseNode for ImageDisplayNode {
     fn name(&self) -> &str {
         "ImageDisplayNode"
+    }
+
+    fn category(&self) -> NodeCategory {
+        NodeCategory::Image
     }
 
     fn get_value(&self) -> Option<&Vec<InputOutputType>> {

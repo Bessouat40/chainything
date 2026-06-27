@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::nodes::base_node::{BaseNode, InputOutputType, STRING_COLOR};
+use crate::nodes::base_node::{BaseNode, InputOutputType, NodeCategory, STRING_COLOR};
 
 use egui::Ui;
 use egui_snarl::{
@@ -24,6 +24,10 @@ impl TextInputNode {
 impl BaseNode for TextInputNode {
     fn name(&self) -> &str {
         "TextInputNode"
+    }
+
+    fn category(&self) -> NodeCategory {
+        NodeCategory::Text
     }
 
     fn get_value(&self) -> Option<&Vec<InputOutputType>> {

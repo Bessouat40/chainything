@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
 
-use crate::nodes::base_node::{BaseNode, InputOutputType, LLM_COLOR};
+use crate::nodes::base_node::{BaseNode, InputOutputType, LLM_COLOR, NodeCategory};
 
 use egui::Ui;
 use egui_snarl::{
@@ -30,6 +30,10 @@ impl OllamaLoaderNode {
 impl BaseNode for OllamaLoaderNode {
     fn name(&self) -> &str {
         "OllamaLoader"
+    }
+
+    fn category(&self) -> NodeCategory {
+        NodeCategory::Llm
     }
 
     fn get_value(&self) -> Option<&Vec<InputOutputType>> {

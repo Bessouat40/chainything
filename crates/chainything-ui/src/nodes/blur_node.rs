@@ -1,7 +1,7 @@
 use std::cell::Cell;
 use std::collections::HashMap;
 
-use crate::nodes::base_node::{BaseNode, InputOutputType, STRING_COLOR};
+use crate::nodes::base_node::{BaseNode, InputOutputType, NodeCategory, STRING_COLOR};
 use egui::Ui;
 use egui_snarl::{
     InPin, OutPin,
@@ -28,6 +28,10 @@ impl BlurNode {
 impl BaseNode for BlurNode {
     fn name(&self) -> &str {
         "Blur"
+    }
+
+    fn category(&self) -> NodeCategory {
+        NodeCategory::Image
     }
 
     fn get_value(&self) -> Option<&Vec<InputOutputType>> {
