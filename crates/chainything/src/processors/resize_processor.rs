@@ -4,16 +4,16 @@ use image::{DynamicImage, imageops::FilterType};
 use crate::processors::base_processor::{Processor, ProcessorError};
 use crate::processors::greyscale_processor::RawImage;
 
-/// Resizes a [`DynamicImage`] using the `image` crate.
+/// Resizes an image using the `image` crate.
 ///
 /// - **Input:** `inputs[0]` = `Arc<DynamicImage>` or `Arc<RawImage>`, `inputs[1]` = `Arc<u32>` (width), `inputs[2]` = `Arc<u32>` (height)
-/// - **Output:** One `Arc<DynamicImage>` containing the resized image.
+/// - **Output:** One `Arc<RawImage>` containing the resized image.
 pub struct ImageResizeProcessor {
     id: String,
     input_image: Option<Arc<DynamicImage>>,
     new_width: Option<Arc<u32>>,
     new_height: Option<Arc<u32>>,
-    output: Option<Arc<DynamicImage>>,
+    output: Option<Arc<RawImage>>,
 }
 
 impl ImageResizeProcessor {
@@ -151,8 +151,30 @@ impl Processor for ImageResizeProcessor {
         }
 
         let resized = image.resize_exact(**width, **height, FilterType::Nearest);
-        
-        self.output = Some(Arc::new(resized));
+
+        // Convert back to RawImage so downstream processors (which all share the
+        // RawImage contract) can consume the output. Preserve the grayscale vs RGB
+        // layout the saver's pixel-count heuristic relies on.
+        let raw = match &resized {
+            DynamicImage::ImageLuma8(_) => {
+                let buf = resized.to_luma8();
+                RawImage {
+                    width: buf.width(),
+                    height: buf.height(),
+                    pixels: buf.into_raw(),
+                }
+            }
+            _ => {
+                let buf = resized.to_rgb8();
+                RawImage {
+                    width: buf.width(),
+                    height: buf.height(),
+                    pixels: buf.into_raw(),
+                }
+            }
+        };
+
+        self.output = Some(Arc::new(raw));
         Ok(())
     }
 }
@@ -177,10 +199,10 @@ mod tests {
 
         let output = proc.get_output();
         assert!(!output.is_empty());
-        
-        let result = output[0].downcast_ref::<Arc<DynamicImage>>().unwrap();
-        assert_eq!(result.width(), 2);
-        assert_eq!(result.height(), 2);
+
+        let result = output[0].downcast_ref::<RawImage>().unwrap();
+        assert_eq!(result.width, 2);
+        assert_eq!(result.height, 2);
     }
 
     #[test]
