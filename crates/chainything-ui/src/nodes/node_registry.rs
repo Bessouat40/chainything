@@ -1,9 +1,10 @@
 use std::collections::HashMap;
 
 use crate::nodes::{
-    base_node::BaseNode, greyscale_node::GreyScaleNode, image_display_node::ImageDisplayNode,
-    image_reader_node::ImageReaderNode, image_saver_node::ImageSaveNode,
-    text_input_node::TextInputNode,
+    base_node::BaseNode, blur_node::BlurNode, greyscale_node::GreyScaleNode,
+    image_display_node::ImageDisplayNode, image_reader_node::ImageReaderNode,
+    image_saver_node::ImageSaveNode, resize_node::ResizeNode, text_input_node::TextInputNode,
+    threshold_node::ThresholdNode,
 };
 
 pub struct NodeRegistry {
@@ -37,6 +38,18 @@ impl NodeRegistry {
             (
                 ImageSaveNode::new().name().to_string(),
                 Box::new(ImageSaveNode::new()) as Box<dyn BaseNode>,
+            ),
+            (
+                BlurNode::new().name().to_string(),
+                Box::new(BlurNode::new()) as Box<dyn BaseNode>,
+            ),
+            (
+                ResizeNode::new().name().to_string(),
+                Box::new(ResizeNode::new()) as Box<dyn BaseNode>,
+            ),
+            (
+                ThresholdNode::new().name().to_string(),
+                Box::new(ThresholdNode::new()) as Box<dyn BaseNode>,
             ),
         ]
         .into_iter()

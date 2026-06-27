@@ -43,6 +43,9 @@ pub trait BaseNode: DynClone {
         _snarl: &Snarl<Box<dyn BaseNode>>,
     ) {
     }
+    fn get_parameter(&self, _index: usize) -> Option<String> {
+        None
+    }
 }
 
 dyn_clone::clone_trait_object!(BaseNode);

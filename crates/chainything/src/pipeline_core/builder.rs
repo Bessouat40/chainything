@@ -1,3 +1,4 @@
+use indexmap::IndexMap;
 use serde::Deserialize;
 
 use crate::pipeline_core::pipeline::{InputSource, Pipeline, PipelineErrors};
@@ -29,6 +30,10 @@ pub struct JsonNodeDef {
     pub node_type: String,
     /// List of inputs required by this node.
     pub inputs: Vec<JsonInputDef>,
+    /// Optional parameters for the processor (e.g., radius, threshold).
+    /// Uses IndexMap to preserve parameter order from JSON.
+    #[serde(default)]
+    pub params: Option<IndexMap<String, serde_json::Value>>,
 }
 
 /// Represents the root structure of a pipeline definition in JSON.
@@ -79,6 +84,28 @@ impl PipelineBuilder {
                     }
                     JsonInputDef::Static { value } => {
                         inputs.push(InputSource::Static(std::sync::Arc::new(value)));
+                    }
+                }
+            }
+
+            if let Some(params) = node_def.params {
+                for (_key, value) in params {
+                    match value {
+                        serde_json::Value::String(s) => {
+                            if let Ok(u) = s.parse::<u32>() {
+                                inputs.push(InputSource::Static(std::sync::Arc::new(u)));
+                            } else if let Ok(u) = s.parse::<u8>() {
+                                inputs.push(InputSource::Static(std::sync::Arc::new(u)));
+                            } else {
+                                inputs.push(InputSource::Static(std::sync::Arc::new(s)));
+                            }
+                        }
+                        serde_json::Value::Number(n) => {
+                            if let Some(u) = n.as_u64() {
+                                inputs.push(InputSource::Static(std::sync::Arc::new(u as u32)));
+                            }
+                        }
+                        _ => {}
                     }
                 }
             }

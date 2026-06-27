@@ -1,6 +1,7 @@
+use std::cell::RefCell;
 use std::collections::HashMap;
 
-use crate::nodes::base_node::{BaseNode, InputOutputType, STRING_COLOR};
+use crate::nodes::base_node::{BaseNode, InputOutputType};
 
 use egui::Ui;
 use egui_snarl::{
@@ -9,11 +10,15 @@ use egui_snarl::{
 };
 
 #[derive(Clone)]
-pub struct ImageSaveNode;
+pub struct ImageSaveNode {
+    path_input: RefCell<String>,
+}
 
 impl ImageSaveNode {
     pub fn new() -> Self {
-        Self
+        Self {
+            path_input: RefCell::new("".to_string()),
+        }
     }
 }
 
@@ -30,41 +35,29 @@ impl BaseNode for ImageSaveNode {
         None
     }
 
-    fn inputs_count(&self) -> usize {
-        2
-    }
-
     fn outputs_count(&self) -> usize {
         0
-    }
-
-    fn mapping_input(&self) -> Option<HashMap<usize, InputOutputType>> {
-        Some(HashMap::from([
-            (0, InputOutputType::RawImage(None)),
-            (1, InputOutputType::String(String::new())),
-        ]))
     }
 
     fn mapping_output(&self) -> Option<HashMap<usize, InputOutputType>> {
         None
     }
 
-    fn show_input(&mut self, pin: &InPin, ui: &mut Ui) -> PinInfo {
-        ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |ui| {
-            if pin.id.input == 0 {
-                ui.label("Raw Image");
-            } else if pin.id.input == 1 {
-                ui.label("String");
-            }
+    fn inputs_count(&self) -> usize {
+        1
+    }
 
+    fn mapping_input(&self) -> Option<HashMap<usize, InputOutputType>> {
+        Some(HashMap::from([(0, InputOutputType::RawImage(None))]))
+    }
+
+    fn show_input(&mut self, _pin: &InPin, ui: &mut Ui) -> PinInfo {
+        ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |ui| {
+            ui.label("Raw Image");
             ui.add_space(5.0);
         });
 
-        let pin_color = if pin.id.input == 0 {
-            egui::Color32::from_rgb(100, 200, 100)
-        } else {
-            STRING_COLOR
-        };
+        let pin_color = egui::Color32::from_rgb(100, 200, 100);
 
         PinInfo::circle()
             .with_fill(pin_color)
@@ -78,7 +71,7 @@ impl BaseNode for ImageSaveNode {
     }
 
     fn has_body(&self) -> bool {
-        false
+        true
     }
 
     fn header_frame(&self, frame: egui::Frame) -> egui::Frame {
@@ -90,8 +83,27 @@ impl BaseNode for ImageSaveNode {
         _node: NodeId,
         _inputs: &[InPin],
         _outputs: &[OutPin],
-        _ui: &mut Ui,
+        ui: &mut Ui,
         _snarl: &Snarl<Box<dyn BaseNode>>,
     ) {
+        ui.with_layout(egui::Layout::top_down(egui::Align::Min), |ui| {
+            ui.set_width(200.0);
+
+            ui.horizontal(|ui| {
+                ui.label("Save To");
+                let mut text = self.path_input.borrow().clone();
+
+                if ui.text_edit_singleline(&mut text).changed() {
+                    *self.path_input.borrow_mut() = text;
+                }
+            });
+        });
+    }
+
+    fn get_parameter(&self, index: usize) -> Option<String> {
+        match index {
+            0 => Some(self.path_input.borrow().clone()),
+            _ => None,
+        }
     }
 }

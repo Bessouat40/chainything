@@ -79,12 +79,19 @@ impl Processor for ImageSaveProcessor {
             .as_ref()
             .ok_or_else(|| ProcessorError::MissingInput("Missing output path".to_string()))?;
 
+        let is_rgb = input.pixels.len() == (input.width * input.height * 3) as usize;
+        let color_type = if is_rgb {
+            image::ColorType::Rgb8
+        } else {
+            image::ColorType::L8
+        };
+
         image::save_buffer(
             output_path.as_str(),
             &input.pixels,
             input.width,
             input.height,
-            image::ColorType::L8,
+            color_type,
         )
         .map_err(|e| ProcessorError::ComputingError(e.to_string()))?;
 
