@@ -1,13 +1,10 @@
-use std::collections::HashMap;
 use std::cell::RefCell;
+use std::collections::HashMap;
 
 use crate::nodes::base_node::{BaseNode, InputOutputType};
 
 use egui::Ui;
-use egui_snarl::{
-    InPin, NodeId, OutPin, Snarl,
-    ui::{PinInfo},
-};
+use egui_snarl::{InPin, NodeId, OutPin, Snarl, ui::PinInfo};
 
 #[derive(Clone)]
 pub struct ImageDisplayNode {
@@ -83,7 +80,7 @@ impl BaseNode for ImageDisplayNode {
                 ui.horizontal(|ui| {
                     ui.label("URL:");
                     let mut text = self.url_input.borrow().clone();
-                
+
                     if ui.text_edit_singleline(&mut text).changed() {
                         *self.url_input.borrow_mut() = text;
                     }
@@ -94,7 +91,11 @@ impl BaseNode for ImageDisplayNode {
 
             let final_uri = {
                 let local_url = self.url_input.borrow().clone();
-                if local_url.is_empty() { None } else { Some(local_url) }
+                if local_url.is_empty() {
+                    None
+                } else {
+                    Some(local_url)
+                }
             };
 
             if let Some(uri) = final_uri {
@@ -107,7 +108,9 @@ impl BaseNode for ImageDisplayNode {
                 ui.allocate_ui(egui::Vec2::new(450.0, 450.0), |ui| {
                     ui.with_layout(
                         egui::Layout::centered_and_justified(egui::Direction::TopDown),
-                        |ui| { ui.label("No image to display"); }
+                        |ui| {
+                            ui.label("No image to display");
+                        },
                     );
                 });
             }

@@ -1,5 +1,5 @@
+use image::DynamicImage;
 use std::sync::Arc;
-use image::{DynamicImage};
 
 use crate::processors::base_processor::{Processor, ProcessorError};
 use crate::processors::greyscale_processor::RawImage;
@@ -63,14 +63,12 @@ impl Processor for ImageThresholdProcessor {
         } else if let Ok(typed_u32) = threshold_input.clone().downcast::<u32>() {
             self.threshold = Some(Arc::new(*typed_u32 as u8));
         } else if let Ok(typed_string) = threshold_input.downcast::<String>() {
-            let threshold_val: u8 = typed_string
-                .parse()
-                .map_err(|_| {
-                    ProcessorError::InvalidInput(format!(
-                        "Cannot parse threshold as u8 for processor {}",
-                        self.id()
-                    ))
-                })?;
+            let threshold_val: u8 = typed_string.parse().map_err(|_| {
+                ProcessorError::InvalidInput(format!(
+                    "Cannot parse threshold as u8 for processor {}",
+                    self.id()
+                ))
+            })?;
             self.threshold = Some(Arc::new(threshold_val));
         } else {
             return Err(ProcessorError::InvalidInput(format!(
@@ -91,39 +89,35 @@ impl Processor for ImageThresholdProcessor {
     }
 
     fn process(&mut self) -> Result<(), ProcessorError> {
-        let image = self
-            .input_image
-            .as_ref()
-            .ok_or_else(|| ProcessorError::MissingInput(format!(
-                "Missing input image for processor {}",
-                self.id()
-            )))?;
+        let image = self.input_image.as_ref().ok_or_else(|| {
+            ProcessorError::MissingInput(format!("Missing input image for processor {}", self.id()))
+        })?;
 
-        let threshold = self
-            .threshold
-            .as_ref()
-            .ok_or_else(|| ProcessorError::MissingInput(format!(
-                "Missing threshold for processor {}",
-                self.id()
-            )))?;
+        let threshold = self.threshold.as_ref().ok_or_else(|| {
+            ProcessorError::MissingInput(format!("Missing threshold for processor {}", self.id()))
+        })?;
 
         // 1. Reconstruire le DynamicImage depuis les pixels bruts du RawImage
         let is_rgb = image.pixels.len() == (image.width * image.height * 3) as usize;
-        
+
         let dynamic_img = if is_rgb {
-            let rgb_buf = image::RgbImage::from_raw(image.width, image.height, image.pixels.clone())
-                .ok_or_else(|| ProcessorError::ComputingError("Invalid RGB buffer".into()))?;
+            let rgb_buf =
+                image::RgbImage::from_raw(image.width, image.height, image.pixels.clone())
+                    .ok_or_else(|| ProcessorError::ComputingError("Invalid RGB buffer".into()))?;
             DynamicImage::ImageRgb8(rgb_buf)
         } else {
-            let gray_buf = image::GrayImage::from_raw(image.width, image.height, image.pixels.clone())
-                .ok_or_else(|| ProcessorError::ComputingError("Invalid Grayscale buffer".into()))?;
+            let gray_buf =
+                image::GrayImage::from_raw(image.width, image.height, image.pixels.clone())
+                    .ok_or_else(|| {
+                        ProcessorError::ComputingError("Invalid Grayscale buffer".into())
+                    })?;
             DynamicImage::ImageLuma8(gray_buf)
         };
 
         // 2. Convertir en Luma (Niveaux de gris) et appliquer le seuil
         let grayscale_img = dynamic_img.to_luma8();
         let mut binary_img = grayscale_img.clone();
-        
+
         for pixel in binary_img.pixels_mut() {
             pixel.0[0] = if pixel.0[0] >= **threshold { 255 } else { 0 };
         }
@@ -134,7 +128,7 @@ impl Processor for ImageThresholdProcessor {
             height: binary_img.height(),
             pixels: binary_img.into_raw(),
         }));
-        
+
         Ok(())
     }
 }
@@ -168,7 +162,7 @@ mod tests {
 
         let output = proc.get_output();
         assert!(!output.is_empty());
-        
+
         // FIX : On cible directement `RawImage` (pas de double Arc)
         let result = output[0].downcast_ref::<RawImage>().unwrap();
         assert_eq!(result.width, 1);
@@ -184,7 +178,7 @@ mod tests {
 
         let output = proc.get_output();
         let result = output[0].downcast_ref::<RawImage>().unwrap();
-        
+
         // Calcul attendu de la luminance pour [255, 0, 0] : (0.299 * 255) = 76
         let expected_first = if 76 >= 100 { 255 } else { 0 };
         assert_eq!(result.pixels[0], expected_first);
@@ -200,7 +194,7 @@ mod tests {
 
         let output = proc.get_output();
         let result = output[0].downcast_ref::<RawImage>().unwrap();
-        
+
         assert_eq!(result.pixels[0], 255);
         assert_eq!(result.pixels[1], 0);
     }
@@ -219,6 +213,9 @@ mod tests {
         let image = create_test_gray_image(2, 1, vec![200, 100]);
         let mut proc = ImageThresholdProcessor::new("threshold".into());
         let result = proc.set_input(vec![image]);
-        assert!(matches!(result.unwrap_err(), ProcessorError::MissingInput(_)));
+        assert!(matches!(
+            result.unwrap_err(),
+            ProcessorError::MissingInput(_)
+        ));
     }
 }

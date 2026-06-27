@@ -1,5 +1,5 @@
-use serde::Deserialize;
 use indexmap::IndexMap;
+use serde::Deserialize;
 
 use crate::pipeline_core::pipeline::{InputSource, Pipeline, PipelineErrors};
 use crate::pipeline_core::registry::ProcessorRegistry;

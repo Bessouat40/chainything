@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use std::cell::RefCell;
+use std::collections::HashMap;
 
 use crate::nodes::base_node::{BaseNode, InputOutputType};
 
@@ -48,9 +48,7 @@ impl BaseNode for ImageSaveNode {
     }
 
     fn mapping_input(&self) -> Option<HashMap<usize, InputOutputType>> {
-        Some(HashMap::from([
-            (0, InputOutputType::RawImage(None)),
-        ]))
+        Some(HashMap::from([(0, InputOutputType::RawImage(None))]))
     }
 
     fn show_input(&mut self, _pin: &InPin, ui: &mut Ui) -> PinInfo {
@@ -94,7 +92,7 @@ impl BaseNode for ImageSaveNode {
             ui.horizontal(|ui| {
                 ui.label("Save To");
                 let mut text = self.path_input.borrow().clone();
-            
+
                 if ui.text_edit_singleline(&mut text).changed() {
                     *self.path_input.borrow_mut() = text;
                 }

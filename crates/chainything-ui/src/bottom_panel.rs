@@ -33,10 +33,14 @@ impl BottomPanel {
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                     let is_running = *self.is_executing.lock().unwrap();
                     let run_btn = Button::new(
-                        RichText::new(if is_running { "⏸ RUNNING..." } else { "▶ RUN" })
-                            .size(14.0)
-                            .color(Color32::WHITE)
-                            .strong(),
+                        RichText::new(if is_running {
+                            "⏸ RUNNING..."
+                        } else {
+                            "▶ RUN"
+                        })
+                        .size(14.0)
+                        .color(Color32::WHITE)
+                        .strong(),
                     )
                     .fill(if is_running {
                         Color32::from_rgb(200, 100, 100)

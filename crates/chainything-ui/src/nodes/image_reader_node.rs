@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use std::cell::RefCell;
+use std::collections::HashMap;
 
 use crate::nodes::base_node::{BaseNode, InputOutputType, STRING_COLOR};
 
@@ -48,10 +48,7 @@ impl BaseNode for ImageReaderNode {
     }
 
     fn mapping_output(&self) -> Option<HashMap<usize, InputOutputType>> {
-        Some(HashMap::from([(
-            0, 
-            InputOutputType::RawImage(None)
-        )]))
+        Some(HashMap::from([(0, InputOutputType::RawImage(None))]))
     }
 
     fn show_input(&mut self, _pin: &InPin, _ui: &mut Ui) -> PinInfo {
@@ -92,7 +89,7 @@ impl BaseNode for ImageReaderNode {
             ui.horizontal(|ui| {
                 ui.label("File:");
                 let mut text = self.path_input.borrow().clone();
-            
+
                 if ui.text_edit_singleline(&mut text).changed() {
                     *self.path_input.borrow_mut() = text;
                 }

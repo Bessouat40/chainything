@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use std::cell::Cell;
+use std::collections::HashMap;
 
 use crate::nodes::base_node::{BaseNode, InputOutputType, STRING_COLOR};
 use egui::Ui;

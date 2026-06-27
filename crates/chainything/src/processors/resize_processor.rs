@@ -1,5 +1,5 @@
-use std::sync::Arc;
 use image::{DynamicImage, imageops::FilterType};
+use std::sync::Arc;
 
 use crate::processors::base_processor::{Processor, ProcessorError};
 use crate::processors::greyscale_processor::RawImage;
@@ -52,14 +52,23 @@ impl Processor for ImageResizeProcessor {
         if let Ok(typed_image) = first_input.clone().downcast::<DynamicImage>() {
             self.input_image = Some(typed_image);
         } else if let Ok(raw_image) = first_input.downcast::<RawImage>() {
-            let is_rgb = raw_image.pixels.len() == (raw_image.width * raw_image.height * 3) as usize;
+            let is_rgb =
+                raw_image.pixels.len() == (raw_image.width * raw_image.height * 3) as usize;
             let dynamic_img = if is_rgb {
-                let rgb_buf = image::RgbImage::from_raw(raw_image.width, raw_image.height, raw_image.pixels.clone())
-                    .ok_or_else(|| ProcessorError::InvalidInput("Invalid RGB buffer".into()))?;
+                let rgb_buf = image::RgbImage::from_raw(
+                    raw_image.width,
+                    raw_image.height,
+                    raw_image.pixels.clone(),
+                )
+                .ok_or_else(|| ProcessorError::InvalidInput("Invalid RGB buffer".into()))?;
                 DynamicImage::ImageRgb8(rgb_buf)
             } else {
-                let gray_buf = image::GrayImage::from_raw(raw_image.width, raw_image.height, raw_image.pixels.clone())
-                    .ok_or_else(|| ProcessorError::InvalidInput("Invalid Grayscale buffer".into()))?;
+                let gray_buf = image::GrayImage::from_raw(
+                    raw_image.width,
+                    raw_image.height,
+                    raw_image.pixels.clone(),
+                )
+                .ok_or_else(|| ProcessorError::InvalidInput("Invalid Grayscale buffer".into()))?;
                 DynamicImage::ImageLuma8(gray_buf)
             };
             self.input_image = Some(Arc::new(dynamic_img));
@@ -73,14 +82,12 @@ impl Processor for ImageResizeProcessor {
         if let Ok(typed_width) = width_input.clone().downcast::<u32>() {
             self.new_width = Some(typed_width);
         } else if let Ok(typed_string) = width_input.downcast::<String>() {
-            let width_val: u32 = typed_string
-                .parse()
-                .map_err(|_| {
-                    ProcessorError::InvalidInput(format!(
-                        "Cannot parse width as u32 for processor {}",
-                        self.id()
-                    ))
-                })?;
+            let width_val: u32 = typed_string.parse().map_err(|_| {
+                ProcessorError::InvalidInput(format!(
+                    "Cannot parse width as u32 for processor {}",
+                    self.id()
+                ))
+            })?;
             self.new_width = Some(Arc::new(width_val));
         } else {
             return Err(ProcessorError::InvalidInput(format!(
@@ -92,14 +99,12 @@ impl Processor for ImageResizeProcessor {
         if let Ok(typed_height) = height_input.clone().downcast::<u32>() {
             self.new_height = Some(typed_height);
         } else if let Ok(typed_string) = height_input.downcast::<String>() {
-            let height_val: u32 = typed_string
-                .parse()
-                .map_err(|_| {
-                    ProcessorError::InvalidInput(format!(
-                        "Cannot parse height as u32 for processor {}",
-                        self.id()
-                    ))
-                })?;
+            let height_val: u32 = typed_string.parse().map_err(|_| {
+                ProcessorError::InvalidInput(format!(
+                    "Cannot parse height as u32 for processor {}",
+                    self.id()
+                ))
+            })?;
             self.new_height = Some(Arc::new(height_val));
         } else {
             return Err(ProcessorError::InvalidInput(format!(
@@ -120,29 +125,17 @@ impl Processor for ImageResizeProcessor {
     }
 
     fn process(&mut self) -> Result<(), ProcessorError> {
-        let image = self
-            .input_image
-            .as_ref()
-            .ok_or_else(|| ProcessorError::MissingInput(format!(
-                "Missing input image for processor {}",
-                self.id()
-            )))?;
+        let image = self.input_image.as_ref().ok_or_else(|| {
+            ProcessorError::MissingInput(format!("Missing input image for processor {}", self.id()))
+        })?;
 
-        let width = self
-            .new_width
-            .as_ref()
-            .ok_or_else(|| ProcessorError::MissingInput(format!(
-                "Missing width for processor {}",
-                self.id()
-            )))?;
+        let width = self.new_width.as_ref().ok_or_else(|| {
+            ProcessorError::MissingInput(format!("Missing width for processor {}", self.id()))
+        })?;
 
-        let height = self
-            .new_height
-            .as_ref()
-            .ok_or_else(|| ProcessorError::MissingInput(format!(
-                "Missing height for processor {}",
-                self.id()
-            )))?;
+        let height = self.new_height.as_ref().ok_or_else(|| {
+            ProcessorError::MissingInput(format!("Missing height for processor {}", self.id()))
+        })?;
 
         if **width == 0 || **height == 0 {
             return Err(ProcessorError::ComputingError(
@@ -222,6 +215,9 @@ mod tests {
         let mut proc = ImageResizeProcessor::new("resize".into());
         let bad: Arc<dyn std::any::Any + Send + Sync> = Arc::new("not an image");
         let result = proc.set_input(vec![bad, Arc::new(2u32), Arc::new(2u32)]);
-        assert!(matches!(result.unwrap_err(), ProcessorError::InvalidInput(_)));
+        assert!(matches!(
+            result.unwrap_err(),
+            ProcessorError::InvalidInput(_)
+        ));
     }
 }

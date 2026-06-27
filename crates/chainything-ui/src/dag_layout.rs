@@ -108,11 +108,17 @@ pub fn generate_payload(snarl: &Snarl<Box<dyn BaseNode>>) -> GraphPayload {
         let mut params = None;
         if let Some(param_value) = node.get_parameter(0) {
             let mut params_map = HashMap::new();
-            params_map.insert("param_0".to_string(), serde_json::Value::String(param_value));
+            params_map.insert(
+                "param_0".to_string(),
+                serde_json::Value::String(param_value),
+            );
 
             let mut idx = 1;
             while let Some(param_value) = node.get_parameter(idx) {
-                params_map.insert(format!("param_{}", idx), serde_json::Value::String(param_value));
+                params_map.insert(
+                    format!("param_{}", idx),
+                    serde_json::Value::String(param_value),
+                );
                 idx += 1;
             }
 

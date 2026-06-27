@@ -1,5 +1,5 @@
+use image::{GrayImage, RgbImage};
 use std::sync::Arc;
-use image::{RgbImage, GrayImage};
 
 use crate::processors::base_processor::{Processor, ProcessorError};
 use crate::processors::greyscale_processor::RawImage;
@@ -28,16 +28,20 @@ impl BlurProcessor {
 
     fn gaussian_blur(&self, image: &RawImage, radius_val: u32) -> RawImage {
         let is_rgb = image.pixels.len() == (image.width * image.height * 3) as usize;
-        
+
         let output_pixels = if is_rgb {
-            if let Some(img_buffer) = RgbImage::from_raw(image.width, image.height, image.pixels.clone()) {
+            if let Some(img_buffer) =
+                RgbImage::from_raw(image.width, image.height, image.pixels.clone())
+            {
                 let blurred = image::imageops::blur(&img_buffer, radius_val as f32);
                 blurred.into_raw()
             } else {
                 image.pixels.clone()
             }
         } else {
-            if let Some(img_buffer) = GrayImage::from_raw(image.width, image.height, image.pixels.clone()) {
+            if let Some(img_buffer) =
+                GrayImage::from_raw(image.width, image.height, image.pixels.clone())
+            {
                 let blurred = image::imageops::blur(&img_buffer, radius_val as f32);
                 blurred.into_raw()
             } else {
@@ -88,14 +92,12 @@ impl Processor for BlurProcessor {
         if let Ok(typed_radius) = radius_input.clone().downcast::<u32>() {
             self.radius = Some(typed_radius);
         } else if let Ok(typed_string) = radius_input.downcast::<String>() {
-            let radius_val: u32 = typed_string
-                .parse()
-                .map_err(|_| {
-                    ProcessorError::InvalidInput(format!(
-                        "Cannot parse radius as u32 for processor {}",
-                        self.id()
-                    ))
-                })?;
+            let radius_val: u32 = typed_string.parse().map_err(|_| {
+                ProcessorError::InvalidInput(format!(
+                    "Cannot parse radius as u32 for processor {}",
+                    self.id()
+                ))
+            })?;
             self.radius = Some(Arc::new(radius_val));
         } else {
             return Err(ProcessorError::InvalidInput(format!(
@@ -116,21 +118,13 @@ impl Processor for BlurProcessor {
     }
 
     fn process(&mut self) -> Result<(), ProcessorError> {
-        let image = self
-            .input_image
-            .as_ref()
-            .ok_or_else(|| ProcessorError::MissingInput(format!(
-                "Missing input image for processor {}",
-                self.id()
-            )))?;
+        let image = self.input_image.as_ref().ok_or_else(|| {
+            ProcessorError::MissingInput(format!("Missing input image for processor {}", self.id()))
+        })?;
 
-        let radius = self
-            .radius
-            .as_ref()
-            .ok_or_else(|| ProcessorError::MissingInput(format!(
-                "Missing radius for processor {}",
-                self.id()
-            )))?;
+        let radius = self.radius.as_ref().ok_or_else(|| {
+            ProcessorError::MissingInput(format!("Missing radius for processor {}", self.id()))
+        })?;
 
         let blurred = self.gaussian_blur(image, **radius);
         self.output = Some(Arc::new(blurred));
@@ -179,7 +173,10 @@ mod tests {
         let image = create_test_image(3, 3, 100);
         let mut proc = BlurProcessor::new("blur".into());
         let result = proc.set_input(vec![image]);
-        assert!(matches!(result.unwrap_err(), ProcessorError::MissingInput(_)));
+        assert!(matches!(
+            result.unwrap_err(),
+            ProcessorError::MissingInput(_)
+        ));
     }
 
     #[test]
@@ -187,7 +184,10 @@ mod tests {
         let mut proc = BlurProcessor::new("blur".into());
         let bad: Arc<dyn std::any::Any + Send + Sync> = Arc::new("not an image");
         let result = proc.set_input(vec![bad, Arc::new(1u32)]);
-        assert!(matches!(result.unwrap_err(), ProcessorError::InvalidInput(_)));
+        assert!(matches!(
+            result.unwrap_err(),
+            ProcessorError::InvalidInput(_)
+        ));
     }
 
     #[test]
@@ -196,6 +196,9 @@ mod tests {
         let mut proc = BlurProcessor::new("blur".into());
         let bad: Arc<dyn std::any::Any + Send + Sync> = Arc::new("not a radius");
         let result = proc.set_input(vec![image, bad]);
-        assert!(matches!(result.unwrap_err(), ProcessorError::InvalidInput(_)));
+        assert!(matches!(
+            result.unwrap_err(),
+            ProcessorError::InvalidInput(_)
+        ));
     }
 }
