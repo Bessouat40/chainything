@@ -2,6 +2,7 @@ use eframe::egui;
 mod app;
 mod bottom_panel;
 mod dag_layout;
+mod graph_io;
 mod left_panel;
 mod nodes;
 mod payload_parser;

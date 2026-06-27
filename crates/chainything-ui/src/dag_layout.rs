@@ -61,6 +61,66 @@ impl DAGLayout {
         serde_json::to_string_pretty(&payload).unwrap_or_else(|_| "{}".to_string())
     }
 
+    /// Prompts for a destination file and writes the full editor graph to it as
+    /// JSON (see [`crate::graph_io`]). A no-op if the user cancels the dialog.
+    pub fn save_graph_to_file(&self) {
+        let Some(path) = rfd::FileDialog::new()
+            .add_filter("Chainything graph", &["json"])
+            .set_file_name("graph.json")
+            .save_file()
+        else {
+            return;
+        };
+
+        match crate::graph_io::serialize_graph(&self.snarl) {
+            Ok(json) => {
+                if let Err(err) = std::fs::write(&path, json) {
+                    eprintln!("✗ Failed to write {}: {}", path.display(), err);
+                }
+            }
+            Err(err) => eprintln!("✗ Export failed: {}", err),
+        }
+    }
+
+    /// Prompts for a JSON file and replaces the current graph with its contents.
+    /// A no-op if the user cancels the dialog; errors are logged and leave the
+    /// existing graph untouched.
+    pub fn load_graph_from_file(&mut self) {
+        let Some(path) = rfd::FileDialog::new()
+            .add_filter("Chainything graph", &["json"])
+            .pick_file()
+        else {
+            return;
+        };
+
+        let json = match std::fs::read_to_string(&path) {
+            Ok(json) => json,
+            Err(err) => {
+                eprintln!("✗ Failed to read {}: {}", path.display(), err);
+                return;
+            }
+        };
+
+        if let Err(err) =
+            crate::graph_io::deserialize_graph(&json, &self.viewer.node_registry, &mut self.snarl)
+        {
+            eprintln!("✗ Import failed: {}", err);
+            return;
+        }
+
+        // The previous run's display bindings reference nodes that no longer
+        // exist; drop them so stale results aren't routed into the new graph.
+        self.bindings.clear();
+    }
+
+    /// Removes every node and connection, resetting the editor to an empty graph.
+    pub fn clear_graph(&mut self) {
+        self.snarl = Snarl::new();
+        // The previous run's display bindings reference nodes that no longer
+        // exist; drop them so stale results aren't routed into the empty graph.
+        self.bindings.clear();
+    }
+
     /// `true` while a pipeline run is in progress on the background thread.
     pub fn is_running(&self) -> bool {
         *self.running.lock().unwrap()

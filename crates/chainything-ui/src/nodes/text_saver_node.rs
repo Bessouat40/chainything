@@ -116,4 +116,10 @@ impl BaseNode for TextSaveNode {
             _ => None,
         }
     }
+
+    fn set_parameter(&mut self, index: usize, value: &str) {
+        if index == 0 {
+            *self.path_input.borrow_mut() = value.to_string();
+        }
+    }
 }

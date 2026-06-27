@@ -136,6 +136,30 @@ impl BaseNode for ImageDisplayNode {
         frame.fill(egui::Color32::from_rgb(70, 40, 40))
     }
 
+    fn get_parameter(&self, index: usize) -> Option<String> {
+        match index {
+            0 => Some(self.url_input.borrow().clone()),
+            1 => Some(match *self.source.borrow() {
+                ImageSource::Node => "Node".to_string(),
+                ImageSource::File => "File".to_string(),
+            }),
+            _ => None,
+        }
+    }
+
+    fn set_parameter(&mut self, index: usize, value: &str) {
+        match index {
+            0 => *self.url_input.borrow_mut() = value.to_string(),
+            1 => {
+                *self.source.borrow_mut() = match value {
+                    "Node" => ImageSource::Node,
+                    _ => ImageSource::File,
+                }
+            }
+            _ => {}
+        }
+    }
+
     fn set_display(&self, data: DisplayData) {
         if let DisplayData::Image(image) = data {
             *self.piped.borrow_mut() = Some(image);

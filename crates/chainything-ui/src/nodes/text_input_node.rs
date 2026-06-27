@@ -89,4 +89,20 @@ impl BaseNode for TextInputNode {
     fn header_frame(&self, frame: egui::Frame) -> egui::Frame {
         frame.fill(egui::Color32::from_rgb(70, 70, 80))
     }
+
+    fn get_parameter(&self, index: usize) -> Option<String> {
+        match index {
+            0 => match &self.value[0] {
+                InputOutputType::String(s) => Some(s.clone()),
+                _ => None,
+            },
+            _ => None,
+        }
+    }
+
+    fn set_parameter(&mut self, index: usize, value: &str) {
+        if index == 0 {
+            self.value[0] = InputOutputType::String(value.to_string());
+        }
+    }
 }

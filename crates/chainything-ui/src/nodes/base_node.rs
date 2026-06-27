@@ -86,6 +86,12 @@ pub trait BaseNode: DynClone {
         None
     }
 
+    /// Restores a parameter previously read via [`get_parameter`], used when
+    /// importing a graph from JSON. `index` matches the one used by
+    /// `get_parameter`. The default is a no-op so nodes without editable state
+    /// (e.g. display nodes) need no implementation.
+    fn set_parameter(&mut self, _index: usize, _value: &str) {}
+
     /// Receives runtime data produced upstream, after a pipeline run.
     ///
     /// Display nodes override this to store the value (using interior
