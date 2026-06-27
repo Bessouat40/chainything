@@ -116,7 +116,9 @@ impl BaseNode for BlurNode {
     }
 
     fn set_parameter(&mut self, index: usize, value: &str) {
-        if index == 0 && let Ok(v) = value.parse::<u32>() {
+        if index == 0
+            && let Ok(v) = value.parse::<u32>()
+        {
             self.radius.set(v);
         }
     }

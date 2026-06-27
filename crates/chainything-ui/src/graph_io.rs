@@ -135,7 +135,9 @@ pub fn deserialize_graph(
                     node.set_parameter(idx, value);
                 }
                 let id = new_snarl.insert_node(Pos2::new(entry.pos[0], entry.pos[1]), node);
-                if !entry.open && let Some(info) = new_snarl.get_node_info_mut(id) {
+                if !entry.open
+                    && let Some(info) = new_snarl.get_node_info_mut(id)
+                {
                     info.open = false;
                 }
                 ids.push(Some(id));

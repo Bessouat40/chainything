@@ -116,7 +116,9 @@ impl BaseNode for ThresholdNode {
     }
 
     fn set_parameter(&mut self, index: usize, value: &str) {
-        if index == 0 && let Ok(v) = value.parse::<u8>() {
+        if index == 0
+            && let Ok(v) = value.parse::<u8>()
+        {
             self.threshold.set(v);
         }
     }
