@@ -83,10 +83,11 @@ impl LeftPanel {
                             continue;
                         }
 
-                        let header = RichText::new(format!("{} ({})", category.label(), names.len()))
-                            .size(11.0)
-                            .color(Color32::from_rgb(120, 125, 135))
-                            .strong();
+                        let header =
+                            RichText::new(format!("{} ({})", category.label(), names.len()))
+                                .size(11.0)
+                                .color(Color32::from_rgb(120, 125, 135))
+                                .strong();
 
                         egui::CollapsingHeader::new(header)
                             // Keep sections open by default, but force-open while a

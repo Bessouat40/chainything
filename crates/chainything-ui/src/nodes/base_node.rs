@@ -48,8 +48,7 @@ impl NodeCategory {
     }
 
     /// Categories in the order they should appear in the library panel.
-    pub const ALL: [NodeCategory; 3] =
-        [NodeCategory::Text, NodeCategory::Image, NodeCategory::Llm];
+    pub const ALL: [NodeCategory; 3] = [NodeCategory::Text, NodeCategory::Image, NodeCategory::Llm];
 }
 
 /// Runtime data pushed into a display node after a pipeline run, so it can be
