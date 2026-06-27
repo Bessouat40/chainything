@@ -220,6 +220,18 @@ impl Pipeline {
         Ok(())
     }
 
+    /// Returns every processor's output, keyed by processor id.
+    ///
+    /// Call after [`execute`](Self::execute). Each entry holds the type-erased
+    /// outputs of the corresponding processor, in output-slot order. Useful for
+    /// consumers (such as a UI) that want to read results without re-running.
+    pub fn collect_outputs(&self) -> HashMap<String, Vec<Arc<dyn Any + Send + Sync>>> {
+        self.processors
+            .iter()
+            .map(|(id, processor)| (id.clone(), processor.get_output_erased()))
+            .collect()
+    }
+
     /// Retrieves configuration for a specific node ID.
     fn get_node_config(&self, id: &str) -> Result<&NodeConfig, PipelineErrors> {
         self.connections

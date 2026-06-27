@@ -3,8 +3,10 @@ use std::collections::HashMap;
 use crate::nodes::{
     base_node::BaseNode, blur_node::BlurNode, greyscale_node::GreyScaleNode,
     image_display_node::ImageDisplayNode, image_reader_node::ImageReaderNode,
-    image_saver_node::ImageSaveNode, resize_node::ResizeNode, text_input_node::TextInputNode,
-    threshold_node::ThresholdNode,
+    image_saver_node::ImageSaveNode, llm_generate_node::LlmGenerateNode,
+    ollama_loader_node::OllamaLoaderNode, resize_node::ResizeNode,
+    text_display_node::TextDisplayNode, text_input_node::TextInputNode,
+    text_saver_node::TextSaveNode, threshold_node::ThresholdNode,
 };
 
 pub struct NodeRegistry {
@@ -50,6 +52,22 @@ impl NodeRegistry {
             (
                 ThresholdNode::new().name().to_string(),
                 Box::new(ThresholdNode::new()) as Box<dyn BaseNode>,
+            ),
+            (
+                OllamaLoaderNode::new().name().to_string(),
+                Box::new(OllamaLoaderNode::new()) as Box<dyn BaseNode>,
+            ),
+            (
+                LlmGenerateNode::new().name().to_string(),
+                Box::new(LlmGenerateNode::new()) as Box<dyn BaseNode>,
+            ),
+            (
+                TextSaveNode::new().name().to_string(),
+                Box::new(TextSaveNode::new()) as Box<dyn BaseNode>,
+            ),
+            (
+                TextDisplayNode::new().name().to_string(),
+                Box::new(TextDisplayNode::new()) as Box<dyn BaseNode>,
             ),
         ]
         .into_iter()
