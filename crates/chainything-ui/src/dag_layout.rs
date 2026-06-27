@@ -43,7 +43,7 @@ impl DAGLayout {
 
 use std::collections::HashMap;
 
-fn get_node_parameter(node: &Box<dyn BaseNode>, input_idx: usize) -> Option<String> {
+fn get_node_parameter(node: &dyn BaseNode, input_idx: usize) -> Option<String> {
     node.get_parameter(input_idx)
 }
 
