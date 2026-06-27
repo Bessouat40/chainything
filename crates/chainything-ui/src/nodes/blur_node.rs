@@ -95,7 +95,7 @@ impl BaseNode for BlurNode {
         ui.horizontal(|ui| {
             ui.label("Radius:");
             let mut r = self.radius.get() as i32;
-            ui.add(egui::Slider::new(&mut r, 1..=20));
+            ui.add(egui::Slider::new(&mut r, 1..=10));
             self.radius.set(r as u32);
         });
     }

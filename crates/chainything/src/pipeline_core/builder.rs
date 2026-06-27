@@ -1,4 +1,5 @@
 use serde::Deserialize;
+use indexmap::IndexMap;
 
 use crate::pipeline_core::pipeline::{InputSource, Pipeline, PipelineErrors};
 use crate::pipeline_core::registry::ProcessorRegistry;
@@ -30,8 +31,9 @@ pub struct JsonNodeDef {
     /// List of inputs required by this node.
     pub inputs: Vec<JsonInputDef>,
     /// Optional parameters for the processor (e.g., radius, threshold).
+    /// Uses IndexMap to preserve parameter order from JSON.
     #[serde(default)]
-    pub params: Option<std::collections::HashMap<String, serde_json::Value>>,
+    pub params: Option<IndexMap<String, serde_json::Value>>,
 }
 
 /// Represents the root structure of a pipeline definition in JSON.

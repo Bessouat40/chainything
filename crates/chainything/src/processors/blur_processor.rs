@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use image::{RgbImage, GrayImage};
 
 use crate::processors::base_processor::{Processor, ProcessorError};
 use crate::processors::greyscale_processor::RawImage;
@@ -26,51 +27,23 @@ impl BlurProcessor {
     }
 
     fn gaussian_blur(&self, image: &RawImage, radius_val: u32) -> RawImage {
-        let radius = (radius_val as i32).max(1);
-        let size = (2 * radius + 1) as usize;
-        let sigma = radius as f32 / 3.0;
-
-        let mut kernel = vec![0.0; size * size];
-        let mut sum = 0.0;
-        let pi2_sigma2 = 2.0 * std::f32::consts::PI * sigma * sigma;
-
-        for y in 0..size {
-            for x in 0..size {
-                let dx = x as i32 - radius;
-                let dy = y as i32 - radius;
-                let val = (-(dx * dx + dy * dy) as f32 / (2.0 * sigma * sigma)).exp() / pi2_sigma2;
-                kernel[y * size + x] = val;
-                sum += val;
-            }
-        }
-
-        for v in &mut kernel {
-            *v /= sum;
-        }
-
-        let mut output_pixels = vec![0u8; image.pixels.len()];
         let is_rgb = image.pixels.len() == (image.width * image.height * 3) as usize;
-        let bytes_per_pixel = if is_rgb { 3 } else { 1 };
-
-        for py in 0..image.height {
-            for px in 0..image.width {
-                for c in 0..bytes_per_pixel {
-                    let mut sum = 0.0;
-                    for ky in 0..size {
-                        for kx in 0..size {
-                            let iy = ((py as i32 + (ky as i32 - radius)).max(0) as u32)
-                                .min(image.height - 1);
-                            let ix = ((px as i32 + (kx as i32 - radius)).max(0) as u32)
-                                .min(image.width - 1);
-                            let idx = ((iy * image.width + ix) as usize * bytes_per_pixel) + c;
-                            sum += image.pixels[idx] as f32 * kernel[ky * size + kx];
-                        }
-                    }
-                    let out_idx = ((py * image.width + px) as usize * bytes_per_pixel) + c;
-                    output_pixels[out_idx] = (sum.round() as u8).min(255);
-                }
+        
+        let output_pixels = if is_rgb {
+            if let Some(img_buffer) = RgbImage::from_raw(image.width, image.height, image.pixels.clone()) {
+                let blurred = image::imageops::blur(&img_buffer, radius_val as f32);
+                blurred.into_raw()
+            } else {
+                image.pixels.clone()
             }
-        }
+        } else {
+            if let Some(img_buffer) = GrayImage::from_raw(image.width, image.height, image.pixels.clone()) {
+                let blurred = image::imageops::blur(&img_buffer, radius_val as f32);
+                blurred.into_raw()
+            } else {
+                image.pixels.clone()
+            }
+        };
 
         RawImage {
             width: image.width,
