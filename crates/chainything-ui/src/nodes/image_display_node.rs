@@ -21,16 +21,21 @@ static NEXT_ID: AtomicUsize = AtomicUsize::new(0);
 enum ImageSource {
     /// The output piped from an upstream node during the last run.
     Node,
-    /// A file path or URL typed into the node.
-    File,
+    /// A remote URL typed into the node, used as-is.
+    Url,
+    /// A local filesystem path typed into the node. A `file://` scheme is
+    /// prepended automatically since egui's file loader requires it.
+    LocalPath,
 }
 
 /// Visual *sink* node that displays an image.
 ///
 /// A source selector lets you switch at any time between:
 /// - **Node**: the `RawImage` piped from an upstream output during the last run
-///   (no need to save to disk), and
-/// - **File**: a path / URL typed into the node, refreshable with *Reload*.
+///   (no need to save to disk),
+/// - **URL**: a remote URL typed into the node, and
+/// - **Local path**: a filesystem path typed into the node (a `file://` scheme
+///   is added automatically), refreshable with *Reload*.
 #[derive(Clone)]
 pub struct ImageDisplayNode {
     id: usize,
@@ -50,7 +55,7 @@ impl ImageDisplayNode {
         Self {
             id: NEXT_ID.fetch_add(1, Ordering::Relaxed),
             url_input: RefCell::new("".to_string()),
-            source: RefCell::new(ImageSource::File),
+            source: RefCell::new(ImageSource::LocalPath),
             piped: RefCell::new(None),
             texture: RefCell::new(None),
             dirty: Cell::new(false),
@@ -60,6 +65,19 @@ impl ImageDisplayNode {
     fn texture_name(&self) -> String {
         format!("image_display_{}", self.id)
     }
+}
+
+/// Turns a local filesystem path into the `file://` URI egui's file loader
+/// requires. The path is resolved to an absolute one first; an input that
+/// already carries the scheme is left untouched.
+fn local_path_uri(input: &str) -> String {
+    let input = input.trim();
+    if input.starts_with("file://") {
+        return input.to_string();
+    }
+    let path = std::path::Path::new(input);
+    let abs = std::fs::canonicalize(path).unwrap_or_else(|_| path.to_path_buf());
+    format!("file://{}", abs.display())
 }
 
 /// Builds an egui [`egui::ColorImage`] from a [`RawImage`] (RGB or greyscale).
@@ -141,7 +159,8 @@ impl BaseNode for ImageDisplayNode {
             0 => Some(self.url_input.borrow().clone()),
             1 => Some(match *self.source.borrow() {
                 ImageSource::Node => "Node".to_string(),
-                ImageSource::File => "File".to_string(),
+                ImageSource::Url => "Url".to_string(),
+                ImageSource::LocalPath => "LocalPath".to_string(),
             }),
             _ => None,
         }
@@ -153,7 +172,8 @@ impl BaseNode for ImageDisplayNode {
             1 => {
                 *self.source.borrow_mut() = match value {
                     "Node" => ImageSource::Node,
-                    _ => ImageSource::File,
+                    "Url" => ImageSource::Url,
+                    _ => ImageSource::LocalPath,
                 }
             }
             _ => {}
@@ -187,12 +207,14 @@ impl BaseNode for ImageDisplayNode {
             ui.set_width(500.0);
             ui.set_height(500.0);
 
-            // Source selector — switch between the piped output and a file/URL.
+            // Source selector — switch between the piped output, a URL and a
+            // local file path.
             let mut source = *self.source.borrow();
             ui.horizontal(|ui| {
                 ui.label("Source:");
                 ui.radio_value(&mut source, ImageSource::Node, "Node");
-                ui.radio_value(&mut source, ImageSource::File, "File / URL");
+                ui.radio_value(&mut source, ImageSource::Url, "URL");
+                ui.radio_value(&mut source, ImageSource::LocalPath, "Local path");
             });
             *self.source.borrow_mut() = source;
 
@@ -200,7 +222,8 @@ impl BaseNode for ImageDisplayNode {
 
             match source {
                 ImageSource::Node => self.show_piped_image(ui),
-                ImageSource::File => self.show_url_image(ui),
+                ImageSource::Url => self.show_file_image(ui, false),
+                ImageSource::LocalPath => self.show_file_image(ui, true),
             }
         });
     }
@@ -238,19 +261,25 @@ impl ImageDisplayNode {
         }
     }
 
-    /// Standalone mode: render an image from a typed path / URL.
-    fn show_url_image(&self, ui: &mut Ui) {
+    /// Standalone mode: render an image from a typed URL or local path.
+    ///
+    /// When `is_local` is set the input is treated as a filesystem path and a
+    /// `file://` scheme is prepended (see [`local_path_uri`]); otherwise it is
+    /// used verbatim as a URL.
+    fn show_file_image(&self, ui: &mut Ui, is_local: bool) {
         let uri = {
-            let local_url = self.url_input.borrow().clone();
-            if local_url.is_empty() {
+            let input = self.url_input.borrow().clone();
+            if input.trim().is_empty() {
                 None
+            } else if is_local {
+                Some(local_path_uri(&input))
             } else {
-                Some(local_url)
+                Some(input)
             }
         };
 
         ui.horizontal(|ui| {
-            ui.label("URL:");
+            ui.label(if is_local { "Path:" } else { "URL:" });
             let mut text = self.url_input.borrow().clone();
             if ui.text_edit_singleline(&mut text).changed() {
                 *self.url_input.borrow_mut() = text;
