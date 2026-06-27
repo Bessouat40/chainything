@@ -6,11 +6,16 @@ use egui::{Color32, Ui};
 use egui_snarl::{InPin, NodeId, OutPin, Snarl, ui::PinInfo};
 
 pub const STRING_COLOR: Color32 = Color32::from_rgb(0x00, 0xb0, 0x00);
+pub const LLM_COLOR: Color32 = Color32::from_rgb(0xd0, 0x80, 0x20);
 
 #[derive(Clone)]
 pub enum InputOutputType {
     String(String),
     RawImage(Option<RawImage>),
+    /// A loaded language model handle, produced by a provider loader node and
+    /// consumed by generation nodes. Carries no UI-side data — it only exists
+    /// at pipeline-execution time.
+    Llm,
 }
 
 impl InputOutputType {
@@ -18,6 +23,7 @@ impl InputOutputType {
         match self {
             InputOutputType::String(_) => "String",
             InputOutputType::RawImage(_) => "RawImage",
+            InputOutputType::Llm => "LLM",
         }
     }
 }

@@ -3,8 +3,9 @@ use std::collections::HashMap;
 use crate::processors::{
     base_processor::ProcessorBase, blur_processor::BlurProcessor,
     greyscale_processor::GreyScaleProcessor, image_reader_processor::ImageReaderProcessor,
-    image_saver_processor::ImageSaveProcessor, resize_processor::ImageResizeProcessor,
-    threshold_processor::ImageThresholdProcessor,
+    image_saver_processor::ImageSaveProcessor, llm_generate_processor::LlmGenerateProcessor,
+    ollama_loader_processor::OllamaLoaderProcessor, resize_processor::ImageResizeProcessor,
+    text_saver_processor::TextSaveProcessor, threshold_processor::ImageThresholdProcessor,
 };
 
 /// Type alias for a function/closure that creates a boxed processor instance.
@@ -103,6 +104,18 @@ impl ProcessorRegistry {
 
         registry.register("Threshold", |id| {
             Ok(Box::new(ImageThresholdProcessor::new(id)) as Box<dyn ProcessorBase>)
+        });
+
+        registry.register("OllamaLoader", |id| {
+            Ok(Box::new(OllamaLoaderProcessor::new(id)) as Box<dyn ProcessorBase>)
+        });
+
+        registry.register("LLMGenerate", |id| {
+            Ok(Box::new(LlmGenerateProcessor::new(id)) as Box<dyn ProcessorBase>)
+        });
+
+        registry.register("TextSave", |id| {
+            Ok(Box::new(TextSaveProcessor::new(id)) as Box<dyn ProcessorBase>)
         });
 
         registry
