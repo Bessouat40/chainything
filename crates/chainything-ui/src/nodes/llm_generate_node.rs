@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::nodes::base_node::{BaseNode, InputOutputType, LLM_COLOR, STRING_COLOR};
+use crate::nodes::base_node::{BaseNode, InputOutputType, LLM_COLOR, NodeCategory, STRING_COLOR};
 
 use egui::Ui;
 use egui_snarl::{
@@ -25,6 +25,10 @@ impl LlmGenerateNode {
 impl BaseNode for LlmGenerateNode {
     fn name(&self) -> &str {
         "LLMGenerate"
+    }
+
+    fn category(&self) -> NodeCategory {
+        NodeCategory::Llm
     }
 
     fn get_value(&self) -> Option<&Vec<InputOutputType>> {

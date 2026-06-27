@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
 
-use crate::nodes::base_node::{BaseNode, DisplayData, InputOutputType, STRING_COLOR};
+use crate::nodes::base_node::{BaseNode, DisplayData, InputOutputType, NodeCategory, STRING_COLOR};
 
 use egui::Ui;
 use egui_snarl::{
@@ -39,6 +39,10 @@ impl TextDisplayNode {
 impl BaseNode for TextDisplayNode {
     fn name(&self) -> &str {
         "TextDisplayNode"
+    }
+
+    fn category(&self) -> NodeCategory {
+        NodeCategory::Text
     }
 
     fn get_value(&self) -> Option<&Vec<InputOutputType>> {

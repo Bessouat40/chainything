@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
 
-use crate::nodes::base_node::{BaseNode, InputOutputType, STRING_COLOR};
+use crate::nodes::base_node::{BaseNode, InputOutputType, NodeCategory, STRING_COLOR};
 
 use egui::Ui;
 use egui_snarl::{
@@ -30,6 +30,10 @@ impl TextSaveNode {
 impl BaseNode for TextSaveNode {
     fn name(&self) -> &str {
         "TextSave"
+    }
+
+    fn category(&self) -> NodeCategory {
+        NodeCategory::Text
     }
 
     fn is_processor(&self) -> bool {

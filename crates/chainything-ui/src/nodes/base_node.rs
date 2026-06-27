@@ -28,6 +28,30 @@ impl InputOutputType {
     }
 }
 
+/// Broad family a node belongs to, used to group nodes by data domain in the
+/// library panel.
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+pub enum NodeCategory {
+    Text,
+    Image,
+    Llm,
+}
+
+impl NodeCategory {
+    /// Header label shown for the category in the library panel.
+    pub fn label(&self) -> &'static str {
+        match self {
+            NodeCategory::Text => "TEXT",
+            NodeCategory::Image => "IMAGE",
+            NodeCategory::Llm => "LLM",
+        }
+    }
+
+    /// Categories in the order they should appear in the library panel.
+    pub const ALL: [NodeCategory; 3] =
+        [NodeCategory::Text, NodeCategory::Image, NodeCategory::Llm];
+}
+
 /// Runtime data pushed into a display node after a pipeline run, so it can be
 /// visualized directly in the graph without saving to disk first.
 #[derive(Clone)]
@@ -38,6 +62,8 @@ pub enum DisplayData {
 
 pub trait BaseNode: DynClone {
     fn name(&self) -> &str;
+    /// Data domain this node belongs to, used to group it in the library panel.
+    fn category(&self) -> NodeCategory;
     fn inputs_count(&self) -> usize;
     fn is_processor(&self) -> bool;
     fn outputs_count(&self) -> usize;
