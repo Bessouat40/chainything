@@ -10,6 +10,10 @@ use crate::processors::{
         llm_generate_processor::LlmGenerateProcessor,
         ollama_loader_processor::OllamaLoaderProcessor,
     },
+    model3d::{
+        model_reader_processor::ModelReaderProcessor, model_render_processor::ModelRenderProcessor,
+        model_saver_processor::ModelSaveProcessor, model_scale_processor::ModelScaleProcessor,
+    },
     text::text_saver_processor::TextSaveProcessor,
 };
 
@@ -123,6 +127,22 @@ impl ProcessorRegistry {
 
         registry.register("TextSave", |id| {
             Ok(Box::new(TextSaveProcessor::new(id)) as Box<dyn ProcessorBase>)
+        });
+
+        registry.register("ModelReader", |id| {
+            Ok(Box::new(ModelReaderProcessor::new(id)) as Box<dyn ProcessorBase>)
+        });
+
+        registry.register("ModelScale", |id| {
+            Ok(Box::new(ModelScaleProcessor::new(id)) as Box<dyn ProcessorBase>)
+        });
+
+        registry.register("ModelSave", |id| {
+            Ok(Box::new(ModelSaveProcessor::new(id)) as Box<dyn ProcessorBase>)
+        });
+
+        registry.register("ModelRender", |id| {
+            Ok(Box::new(ModelRenderProcessor::new(id)) as Box<dyn ProcessorBase>)
         });
 
         registry

@@ -2,11 +2,13 @@ use dyn_clone::DynClone;
 use std::collections::HashMap;
 
 use chainything::processors::images::greyscale_processor::RawImage;
+use chainything::processors::model3d::mesh::Mesh3D;
 use egui::{Color32, Ui};
 use egui_snarl::{InPin, NodeId, OutPin, Snarl, ui::PinInfo};
 
 pub const STRING_COLOR: Color32 = Color32::from_rgb(0x00, 0xb0, 0x00);
 pub const LLM_COLOR: Color32 = Color32::from_rgb(0xd0, 0x80, 0x20);
+pub const MESH_COLOR: Color32 = Color32::from_rgb(0x40, 0x90, 0xd0);
 
 #[derive(Clone)]
 pub enum InputOutputType {
@@ -16,6 +18,9 @@ pub enum InputOutputType {
     /// consumed by generation nodes. Carries no UI-side data — it only exists
     /// at pipeline-execution time.
     Llm,
+    /// A 3D triangle mesh, produced by a model reader and consumed by transform
+    /// or save nodes.
+    Mesh3D(Option<Mesh3D>),
 }
 
 impl InputOutputType {
@@ -24,6 +29,7 @@ impl InputOutputType {
             InputOutputType::String(_) => "String",
             InputOutputType::RawImage(_) => "RawImage",
             InputOutputType::Llm => "LLM",
+            InputOutputType::Mesh3D(_) => "Mesh3D",
         }
     }
 }
@@ -51,6 +57,7 @@ pub enum NodeCategory {
     Text,
     Image,
     Llm,
+    Model3D,
 }
 
 impl NodeCategory {
@@ -60,11 +67,17 @@ impl NodeCategory {
             NodeCategory::Text => "TEXT",
             NodeCategory::Image => "IMAGE",
             NodeCategory::Llm => "LLM",
+            NodeCategory::Model3D => "3D",
         }
     }
 
     /// Categories in the order they should appear in the library panel.
-    pub const ALL: [NodeCategory; 3] = [NodeCategory::Text, NodeCategory::Image, NodeCategory::Llm];
+    pub const ALL: [NodeCategory; 4] = [
+        NodeCategory::Text,
+        NodeCategory::Image,
+        NodeCategory::Llm,
+        NodeCategory::Model3D,
+    ];
 }
 
 /// Runtime data pushed into a display node after a pipeline run, so it can be

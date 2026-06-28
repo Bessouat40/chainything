@@ -8,6 +8,10 @@ use crate::nodes::{
         resize_node::ResizeNode, threshold_node::ThresholdNode,
     },
     llm::{llm_generate_node::LlmGenerateNode, ollama_loader_node::OllamaLoaderNode},
+    model3d::{
+        model_reader_node::ModelReaderNode, model_render_node::ModelRenderNode,
+        model_saver_node::ModelSaveNode, model_scale_node::ModelScaleNode,
+    },
     text::{
         text_display_node::TextDisplayNode, text_input_node::TextInputNode,
         text_saver_node::TextSaveNode,
@@ -73,6 +77,22 @@ impl NodeRegistry {
             (
                 TextDisplayNode::new().name().to_string(),
                 Box::new(TextDisplayNode::new()) as Box<dyn BaseNode>,
+            ),
+            (
+                ModelReaderNode::new().name().to_string(),
+                Box::new(ModelReaderNode::new()) as Box<dyn BaseNode>,
+            ),
+            (
+                ModelScaleNode::new().name().to_string(),
+                Box::new(ModelScaleNode::new()) as Box<dyn BaseNode>,
+            ),
+            (
+                ModelRenderNode::new().name().to_string(),
+                Box::new(ModelRenderNode::new()) as Box<dyn BaseNode>,
+            ),
+            (
+                ModelSaveNode::new().name().to_string(),
+                Box::new(ModelSaveNode::new()) as Box<dyn BaseNode>,
             ),
         ]
         .into_iter()
