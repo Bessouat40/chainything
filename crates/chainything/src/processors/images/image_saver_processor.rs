@@ -1,7 +1,5 @@
-use crate::processors::{
-    base_processor::{Processor, ProcessorError},
-    greyscale_processor::RawImage,
-};
+use crate::processors::base_processor::{Processor, ProcessorError};
+use crate::processors::images::greyscale_processor::RawImage;
 use std::{any::Any, sync::Arc};
 
 /// The `ImageSaveProcessor` saves a `RawImage` to the filesystem.

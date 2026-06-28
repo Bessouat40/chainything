@@ -2,7 +2,7 @@ use image::{GrayImage, RgbImage};
 use std::sync::Arc;
 
 use crate::processors::base_processor::{Processor, ProcessorError};
-use crate::processors::greyscale_processor::RawImage;
+use crate::processors::images::greyscale_processor::RawImage;
 
 /// Applies a Gaussian blur to a [`RawImage`].
 ///

@@ -6,7 +6,7 @@ use crate::nodes::base_node::{
     BaseNode, DisplayData, InputOutputType, NodeCategory, NodeInformations, STRING_COLOR,
 };
 
-use chainything::processors::greyscale_processor::RawImage;
+use chainything::processors::images::greyscale_processor::RawImage;
 use egui::Ui;
 use egui_snarl::{
     InPin, NodeId, OutPin, Snarl,
