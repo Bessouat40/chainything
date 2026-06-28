@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
 
-use crate::nodes::base_node::{BaseNode, InputOutputType, NodeCategory};
+use crate::nodes::base_node::{BaseNode, InputOutputType, NodeCategory, NodeInformations};
 
 use egui::Ui;
 use egui_snarl::{
@@ -25,6 +25,10 @@ impl ImageSaveNode {
 impl BaseNode for ImageSaveNode {
     fn name(&self) -> &str {
         "ImageSaveNode"
+    }
+
+    fn informations(&self) -> NodeInformations {
+        NodeInformations::new("Saves the incoming image to disk at the configured file path.")
     }
 
     fn category(&self) -> NodeCategory {

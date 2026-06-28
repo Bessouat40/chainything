@@ -28,6 +28,22 @@ impl InputOutputType {
     }
 }
 
+/// Human-readable documentation for a node, shown in the info modal opened from
+/// the node header. Input and output types are derived separately from the
+/// node's pin mappings, so this only carries the prose description.
+#[derive(Clone)]
+pub struct NodeInformations {
+    pub description: String,
+}
+
+impl NodeInformations {
+    pub fn new(description: impl Into<String>) -> Self {
+        Self {
+            description: description.into(),
+        }
+    }
+}
+
 /// Broad family a node belongs to, used to group nodes by data domain in the
 /// library panel.
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
@@ -61,6 +77,9 @@ pub enum DisplayData {
 
 pub trait BaseNode: DynClone {
     fn name(&self) -> &str;
+    /// Documentation shown in the node's info modal (description only; input and
+    /// output types are derived from the pin mappings).
+    fn informations(&self) -> NodeInformations;
     /// Data domain this node belongs to, used to group it in the library panel.
     fn category(&self) -> NodeCategory;
     fn inputs_count(&self) -> usize;

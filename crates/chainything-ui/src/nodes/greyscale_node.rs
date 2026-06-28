@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 
-use crate::nodes::base_node::{BaseNode, InputOutputType, NodeCategory, STRING_COLOR};
+use crate::nodes::base_node::{
+    BaseNode, InputOutputType, NodeCategory, NodeInformations, STRING_COLOR,
+};
 use egui::Ui;
 use egui_snarl::{
     InPin, OutPin,
@@ -19,6 +21,10 @@ impl GreyScaleNode {
 impl BaseNode for GreyScaleNode {
     fn name(&self) -> &str {
         "Greyscale"
+    }
+
+    fn informations(&self) -> NodeInformations {
+        NodeInformations::new("Converts a colour image to greyscale.")
     }
 
     fn category(&self) -> NodeCategory {

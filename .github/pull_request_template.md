@@ -36,6 +36,7 @@ Please include a summary of the changes and why they're being made.
 
 - [ ] Ran `cargo fmt` to format code
 - [ ] Ran `cargo test` to verify everything works
+- [ ] Ran `cargo clippy` to catch common mistakes and improve code quality
 - [ ] No compiler warnings or errors
 - [ ] Code follows project conventions
 

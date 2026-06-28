@@ -1,7 +1,9 @@
 use std::cell::Cell;
 use std::collections::HashMap;
 
-use crate::nodes::base_node::{BaseNode, InputOutputType, NodeCategory, STRING_COLOR};
+use crate::nodes::base_node::{
+    BaseNode, InputOutputType, NodeCategory, NodeInformations, STRING_COLOR,
+};
 use egui::Ui;
 use egui_snarl::{
     InPin, OutPin,
@@ -34,6 +36,10 @@ impl ResizeNode {
 impl BaseNode for ResizeNode {
     fn name(&self) -> &str {
         "Resize"
+    }
+
+    fn informations(&self) -> NodeInformations {
+        NodeInformations::new("Resizes an image to the configured width and height.")
     }
 
     fn category(&self) -> NodeCategory {
@@ -103,13 +109,13 @@ impl BaseNode for ResizeNode {
         _snarl: &egui_snarl::Snarl<Box<dyn BaseNode>>,
     ) {
         ui.horizontal(|ui| {
-            ui.label("W:");
+            ui.label("Width:");
             let mut w = self.width.get() as i32;
             ui.add(egui::DragValue::new(&mut w).range(1..=4096));
             self.width.set(w as u32);
         });
         ui.horizontal(|ui| {
-            ui.label("H:");
+            ui.label("Height:");
             let mut h = self.height.get() as i32;
             ui.add(egui::DragValue::new(&mut h).range(1..=4096));
             self.height.set(h as u32);

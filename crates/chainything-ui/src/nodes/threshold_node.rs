@@ -1,7 +1,9 @@
 use std::cell::Cell;
 use std::collections::HashMap;
 
-use crate::nodes::base_node::{BaseNode, InputOutputType, NodeCategory, STRING_COLOR};
+use crate::nodes::base_node::{
+    BaseNode, InputOutputType, NodeCategory, NodeInformations, STRING_COLOR,
+};
 use egui::Ui;
 use egui_snarl::{
     InPin, OutPin,
@@ -28,6 +30,12 @@ impl ThresholdNode {
 impl BaseNode for ThresholdNode {
     fn name(&self) -> &str {
         "Threshold"
+    }
+
+    fn informations(&self) -> NodeInformations {
+        NodeInformations::new(
+            "Applies a binary threshold to an image, producing a black-and-white result.",
+        )
     }
 
     fn category(&self) -> NodeCategory {
