@@ -1,6 +1,6 @@
 [package]
 name = "chainything-ui"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 description = "Visual node editor for Chainything DAG pipeline engine"
 license = "MIT"
@@ -10,7 +10,7 @@ keywords = ["dag", "pipeline", "workflow", "ui", "egui"]
 categories = ["development-tools", "graphics"]
 
 [dependencies]
-chainything = { version = "0.1.0", path = "../chainything" }
+chainything = { version = "0.2.0", path = "../chainything" }
 dyn-clone = "1.0.20"
 eframe = "0.34.3"
 egui = "0.34.3"
