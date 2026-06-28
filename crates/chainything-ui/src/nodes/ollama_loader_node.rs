@@ -1,7 +1,9 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
 
-use crate::nodes::base_node::{BaseNode, InputOutputType, LLM_COLOR, NodeCategory};
+use crate::nodes::base_node::{
+    BaseNode, InputOutputType, LLM_COLOR, NodeCategory, NodeInformations,
+};
 
 use egui::Ui;
 use egui_snarl::{
@@ -30,6 +32,12 @@ impl OllamaLoaderNode {
 impl BaseNode for OllamaLoaderNode {
     fn name(&self) -> &str {
         "OllamaLoader"
+    }
+
+    fn informations(&self) -> NodeInformations {
+        NodeInformations::new(
+            "Loads a language model served by Ollama and outputs a reusable LLM handle for generation nodes.",
+        )
     }
 
     fn category(&self) -> NodeCategory {

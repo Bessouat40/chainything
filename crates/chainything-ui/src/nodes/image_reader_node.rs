@@ -1,7 +1,9 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
 
-use crate::nodes::base_node::{BaseNode, InputOutputType, NodeCategory, STRING_COLOR};
+use crate::nodes::base_node::{
+    BaseNode, InputOutputType, NodeCategory, NodeInformations, STRING_COLOR,
+};
 
 use egui::Ui;
 use egui_snarl::{
@@ -25,6 +27,12 @@ impl ImageReaderNode {
 impl BaseNode for ImageReaderNode {
     fn name(&self) -> &str {
         "ImageReader"
+    }
+
+    fn informations(&self) -> NodeInformations {
+        NodeInformations::new(
+            "Reads an image from the configured file path and outputs it as raw image data.",
+        )
     }
 
     fn category(&self) -> NodeCategory {

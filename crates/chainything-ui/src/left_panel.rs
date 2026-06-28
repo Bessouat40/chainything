@@ -1,20 +1,24 @@
+use std::collections::HashMap;
+
 use egui::*;
 use egui_snarl::Snarl;
 
 use crate::nodes::{
-    base_node::{BaseNode, NodeCategory},
+    base_node::{BaseNode, InputOutputType, NodeCategory},
     node_registry::NodeRegistry,
 };
 
 #[derive(Default)]
 pub struct LeftPanel {
     search: String,
+    info_modal: Option<String>,
 }
 
 impl LeftPanel {
     pub fn new() -> Self {
         Self {
             search: String::new(),
+            info_modal: None,
         }
     }
 
@@ -114,7 +118,7 @@ impl LeftPanel {
     }
 
     fn show_node_entry(
-        &self,
+        &mut self,
         ui: &mut egui::Ui,
         node: &str,
         node_registry: &NodeRegistry,
@@ -135,6 +139,13 @@ impl LeftPanel {
                                     .color(Color32::from_rgb(210, 215, 220))
                                     .strong(),
                             );
+                            if info_icon_button(ui)
+                                .on_hover_text("Informations")
+                                .on_hover_cursor(egui::CursorIcon::PointingHand)
+                                .clicked()
+                            {
+                                self.info_modal = Some(node.to_string());
+                            }
                         });
                         ui.add_space(5.0);
 
@@ -156,9 +167,103 @@ impl LeftPanel {
                             {
                                 self.add_node(node, node_registry, snarl, ui.ctx());
                             }
+
+                            ui.add_space(6.0);
+
                         });
                     });
                 });
             });
+
+        if self.info_modal.as_deref() == Some(node) {
+            self.show_info_modal(ui, node, node_registry);
+        }
     }
+
+    /// Renders the information modal for `node`, reading its description and pin
+    /// types from the registry's template instance.
+    fn show_info_modal(&mut self, ui: &mut egui::Ui, node: &str, node_registry: &NodeRegistry) {
+        let Some(template) = node_registry.nodes.get(node) else {
+            self.info_modal = None;
+            return;
+        };
+
+        let description = template.informations().description;
+        let inputs_summary = pins_summary(template.mapping_input(), template.inputs_count());
+        let outputs_summary = pins_summary(template.mapping_output(), template.outputs_count());
+
+        let modal =
+            egui::Modal::new(egui::Id::new(("node_info_modal", node))).show(ui.ctx(), |ui| {
+                ui.set_max_width(360.0);
+                ui.heading(node);
+                ui.separator();
+
+                ui.label(RichText::new("Description").strong());
+                ui.label(description);
+                ui.add_space(8.0);
+
+                ui.label(RichText::new("Input").strong());
+                ui.label(inputs_summary);
+                ui.add_space(8.0);
+
+                ui.label(RichText::new("Output").strong());
+                ui.label(outputs_summary);
+                ui.add_space(8.0);
+
+                ui.separator();
+                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                    if ui.button("Close").clicked() {
+                        ui.close();
+                    }
+                });
+            });
+
+        if modal.should_close() {
+            self.info_modal = None;
+        }
+    }
+}
+
+/// Draws a small circled "i" info button. Painted by hand rather than using a
+/// glyph so it renders consistently regardless of the bundled fonts.
+fn info_icon_button(ui: &mut egui::Ui) -> Response {
+    let (rect, response) = ui.allocate_exact_size(vec2(18.0, 18.0), Sense::click());
+    if ui.is_rect_visible(rect) {
+        let visuals = ui.style().interact(&response);
+        let center = rect.center();
+        let radius = rect.width() * 0.5 - 1.0;
+        let color = visuals.fg_stroke.color;
+        let painter = ui.painter();
+        painter.circle_stroke(center, radius, Stroke::new(1.4, color));
+        painter.text(
+            center,
+            Align2::CENTER_CENTER,
+            "i",
+            FontId::proportional(12.0),
+            color,
+        );
+    }
+    response
+}
+
+/// Formats a node's pin types as one `[index] Type` line per pin, derived from
+/// the node's input/output mapping. Returns `"—"` when the node has no pins.
+fn pins_summary(mapping: Option<HashMap<usize, InputOutputType>>, count: usize) -> String {
+    if count == 0 {
+        return "—".to_string();
+    }
+    let map = mapping.unwrap_or_default();
+    (0..count)
+        .map(|i| {
+            let ty = map.get(&i).map(|t| t.to_string()).unwrap_or("?");
+            // Number the pins (1-based) only when there is more than one, so a
+            // single pin reads simply as its type for non-technical users.
+            if count > 1 {
+                format!("{}. {ty}", i + 1)
+            } else {
+                ty.to_string()
+            }
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
 }

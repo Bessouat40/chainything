@@ -1,7 +1,9 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
 
-use crate::nodes::base_node::{BaseNode, DisplayData, InputOutputType, NodeCategory, STRING_COLOR};
+use crate::nodes::base_node::{
+    BaseNode, DisplayData, InputOutputType, NodeCategory, NodeInformations, STRING_COLOR,
+};
 
 use egui::Ui;
 use egui_snarl::{
@@ -39,6 +41,12 @@ impl TextDisplayNode {
 impl BaseNode for TextDisplayNode {
     fn name(&self) -> &str {
         "TextDisplayNode"
+    }
+
+    fn informations(&self) -> NodeInformations {
+        NodeInformations::new(
+            "Displays text in the graph: either piped from an upstream connection after a run, or read from a file path when left unconnected.",
+        )
     }
 
     fn category(&self) -> NodeCategory {
