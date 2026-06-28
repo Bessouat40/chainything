@@ -1,12 +1,19 @@
 use std::collections::HashMap;
 
 use crate::processors::{
-    base_processor::ProcessorBase, blur_processor::BlurProcessor,
-    greyscale_processor::GreyScaleProcessor, image_reader_processor::ImageReaderProcessor,
-    image_saver_processor::ImageSaveProcessor, llm_generate_processor::LlmGenerateProcessor,
-    ollama_loader_processor::OllamaLoaderProcessor, resize_processor::ImageResizeProcessor,
-    text_saver_processor::TextSaveProcessor, threshold_processor::ImageThresholdProcessor,
+    images::{
+        blur_processor::BlurProcessor, greyscale_processor::GreyScaleProcessor,
+        image_reader_processor::ImageReaderProcessor, image_saver_processor::ImageSaveProcessor,
+        resize_processor::ImageResizeProcessor, threshold_processor::ImageThresholdProcessor,
+    },
+    llm::{
+        llm_generate_processor::LlmGenerateProcessor,
+        ollama_loader_processor::OllamaLoaderProcessor,
+    },
+    text::text_saver_processor::TextSaveProcessor,
 };
+
+use crate::processors::base_processor::ProcessorBase;
 
 /// Type alias for a function/closure that creates a boxed processor instance.
 type ProcessorConstructor = Box<dyn Fn(String) -> Result<Box<dyn ProcessorBase>, String>>;

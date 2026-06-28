@@ -1,12 +1,17 @@
 use std::collections::HashMap;
 
 use crate::nodes::{
-    base_node::BaseNode, blur_node::BlurNode, greyscale_node::GreyScaleNode,
-    image_display_node::ImageDisplayNode, image_reader_node::ImageReaderNode,
-    image_saver_node::ImageSaveNode, llm_generate_node::LlmGenerateNode,
-    ollama_loader_node::OllamaLoaderNode, resize_node::ResizeNode,
-    text_display_node::TextDisplayNode, text_input_node::TextInputNode,
-    text_saver_node::TextSaveNode, threshold_node::ThresholdNode,
+    base_node::BaseNode,
+    images::{
+        blur_node::BlurNode, greyscale_node::GreyScaleNode, image_display_node::ImageDisplayNode,
+        image_reader_node::ImageReaderNode, image_saver_node::ImageSaveNode,
+        resize_node::ResizeNode, threshold_node::ThresholdNode,
+    },
+    llm::{llm_generate_node::LlmGenerateNode, ollama_loader_node::OllamaLoaderNode},
+    text::{
+        text_display_node::TextDisplayNode, text_input_node::TextInputNode,
+        text_saver_node::TextSaveNode,
+    },
 };
 
 pub struct NodeRegistry {

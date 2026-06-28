@@ -3,7 +3,7 @@ use crate::nodes::viewer::DemoViewer;
 use crate::nodes::{base_node::BaseNode, node_registry::NodeRegistry};
 use crate::payload_parser::{GraphPayload, InputPayload, NodePayload};
 use chainything::prelude::*;
-use chainything::processors::greyscale_processor::RawImage;
+use chainything::processors::images::greyscale_processor::RawImage;
 use egui::Ui;
 use egui_snarl::{InPinId, NodeId, Snarl, ui::SnarlWidget};
 use std::any::Any;

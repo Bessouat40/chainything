@@ -1,7 +1,7 @@
 use dyn_clone::DynClone;
 use std::collections::HashMap;
 
-use chainything::processors::greyscale_processor::RawImage;
+use chainything::processors::images::greyscale_processor::RawImage;
 use egui::{Color32, Ui};
 use egui_snarl::{InPin, NodeId, OutPin, Snarl, ui::PinInfo};
 

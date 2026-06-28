@@ -1,7 +1,5 @@
-use crate::processors::{
-    base_processor::{Processor, ProcessorError},
-    greyscale_processor::RawImage,
-};
+use crate::processors::base_processor::{Processor, ProcessorError};
+use crate::processors::images::greyscale_processor::RawImage;
 use image::GenericImageView;
 use std::sync::Arc;
 
