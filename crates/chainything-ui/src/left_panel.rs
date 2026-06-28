@@ -169,7 +169,6 @@ impl LeftPanel {
                             }
 
                             ui.add_space(6.0);
-
                         });
                     });
                 });
