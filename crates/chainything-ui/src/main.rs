@@ -28,30 +28,3 @@ fn main() -> eframe::Result {
         }),
     )
 }
-
-// use rig::client::{CompletionClient, ProviderClient};
-// use rig::completion::Prompt;
-// use rig::providers::ollama;
-
-// use crate::agent::prompt::PROMPT;
-// use crate::agent::tools::{GetNodeCategories, GetNodesFromCategory};
-
-// #[tokio::main]
-// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-//     let client = ollama::Client::from_env()?;
-
-//     let agent = client
-//         .agent("qwen3.5:9b")
-//         .preamble(PROMPT)
-//         .max_tokens(2048)
-//         .default_max_turns(10)
-//         .tool(GetNodeCategories)
-//         .tool(GetNodesFromCategory)
-//         .build();
-
-//     let response = agent.prompt("Create for me a pipeline to load an image, apply a threshold and save the result.").await?;
-
-//     println!("{response}");
-
-//     Ok(())
-// }
