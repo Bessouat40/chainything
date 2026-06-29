@@ -113,6 +113,13 @@ impl DAGLayout {
         self.bindings.clear();
     }
 
+    /// Loads a graph from a JSON string.
+    pub fn load_graph_from_json(&mut self, json: &str) -> Result<(), String> {
+        crate::graph_io::deserialize_graph(json, &self.viewer.node_registry, &mut self.snarl)?;
+        self.bindings.clear();
+        Ok(())
+    }
+
     /// Removes every node and connection, resetting the editor to an empty graph.
     pub fn clear_graph(&mut self) {
         self.snarl = Snarl::new();

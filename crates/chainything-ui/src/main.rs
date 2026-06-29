@@ -7,6 +7,7 @@ mod left_panel;
 mod nodes;
 mod payload_parser;
 mod agent;
+mod llm_modal;
 
 use app::ChainythingApp;
 
@@ -19,7 +20,7 @@ fn main() -> eframe::Result {
         ..Default::default()
     };
     eframe::run_native(
-        "MyApp",
+        "Chainything",
         native_options,
         Box::new(|cc| {
             egui_extras::install_image_loaders(&cc.egui_ctx);
