@@ -1,0 +1,31 @@
+{
+        "nodes": [
+                {
+                        "id": "0",
+                        "node_type": "ImageReader",
+                        "inputs": [],
+                        "params": {
+                                "image_path": "C://Users//uiv22989//Downloads//input.jpg"
+                        }
+                },
+                {
+                        "id": "1",
+                        "node_type": "Threshold",
+                        "inputs": [
+                                {
+                                        "source_node": "0",
+                                        "source_slot": 0
+                                }
+                        ],
+                        "params": {
+                                "threshold": 128
+                        }
+                },
+                {
+                        "id": "2",
+                        "node_type": "Save",
+                        "inputs": [],
+                        "params": {}
+                }
+        ]
+}
