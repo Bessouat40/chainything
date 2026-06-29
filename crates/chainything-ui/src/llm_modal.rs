@@ -119,8 +119,8 @@ impl LlmModal {
                                         .interactive(false)
                                         .font(TextStyle::Monospace.resolve(ui.style())),
                                 );
-                                if message.role == "assistant" {
-                                    if let Some(extracted_json) =
+                                if message.role == "assistant"
+                                    && let Some(extracted_json) =
                                         extract_json_from_markdown(&message.content)
                                     {
                                         ui.add_space(4.0);
@@ -128,7 +128,6 @@ impl LlmModal {
                                             json_to_apply = Some(extracted_json);
                                         }
                                     }
-                                }
                                 ui.separator();
                             }
                         });
@@ -214,7 +213,7 @@ impl LlmModal {
                             .on_hover_cursor(egui::CursorIcon::PointingHand)
                             .clicked()
                         {
-                            self.is_open = false;
+                            self.close();
                         }
                     });
                 });
