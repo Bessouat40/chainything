@@ -1,9 +1,11 @@
 use eframe::egui;
+mod agent;
 mod app;
 mod bottom_panel;
 mod dag_layout;
 mod graph_io;
 mod left_panel;
+mod llm_modal;
 mod nodes;
 mod payload_parser;
 
@@ -18,7 +20,7 @@ fn main() -> eframe::Result {
         ..Default::default()
     };
     eframe::run_native(
-        "MyApp",
+        "Chainything",
         native_options,
         Box::new(|cc| {
             egui_extras::install_image_loaders(&cc.egui_ctx);

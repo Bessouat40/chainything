@@ -24,7 +24,7 @@ impl ImageSaveNode {
 
 impl BaseNode for ImageSaveNode {
     fn name(&self) -> &str {
-        "ImageSaveNode"
+        "ImageSave"
     }
 
     fn informations(&self) -> NodeInformations {

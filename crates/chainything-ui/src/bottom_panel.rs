@@ -1,12 +1,22 @@
 use crate::dag_layout::DAGLayout;
+use crate::llm_modal::LlmModal;
 use egui::*;
 
-#[derive(Default)]
-pub struct BottomPanel;
+pub struct BottomPanel {
+    llm_modal: LlmModal,
+}
+
+impl Default for BottomPanel {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl BottomPanel {
     pub fn new() -> Self {
-        Self
+        Self {
+            llm_modal: LlmModal::new(),
+        }
     }
 
     pub fn show(&mut self, ui: &mut egui::Ui, dag_layout: &mut DAGLayout) {
@@ -90,6 +100,27 @@ impl BottomPanel {
 
                     ui.add_space(8.0);
 
+                    let ai_btn = Button::new(
+                        RichText::new("✨ AI Generate")
+                            .size(13.0)
+                            .color(Color32::from_rgb(225, 230, 235))
+                            .strong(),
+                    )
+                    .fill(Color32::from_rgb(100, 80, 150))
+                    .corner_radius(8.0)
+                    .min_size(Vec2::new(130.0, 38.0));
+
+                    if ui
+                        .add_enabled(!is_running, ai_btn)
+                        .on_hover_cursor(egui::CursorIcon::PointingHand)
+                        .on_hover_text("Generate a graph using AI")
+                        .clicked()
+                    {
+                        self.llm_modal.open();
+                    }
+
+                    ui.add_space(8.0);
+
                     let clear_btn = Button::new(
                         RichText::new("🗑 Clear")
                             .size(13.0)
@@ -110,5 +141,11 @@ impl BottomPanel {
                     }
                 });
             });
+        if let Some(valid_json) = self.llm_modal.show(ui.ctx()) {
+            match dag_layout.load_graph_from_json(&valid_json) {
+                Ok(_) => {}
+                Err(err) => eprintln!("✗ Import failed: {}", err),
+            }
+        }
     }
 }

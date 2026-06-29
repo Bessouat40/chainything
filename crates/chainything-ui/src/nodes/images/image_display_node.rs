@@ -101,7 +101,7 @@ fn color_image_from_raw(image: &RawImage) -> egui::ColorImage {
 
 impl BaseNode for ImageDisplayNode {
     fn name(&self) -> &str {
-        "ImageDisplayNode"
+        "ImageDisplay"
     }
 
     fn informations(&self) -> NodeInformations {
