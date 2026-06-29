@@ -6,6 +6,10 @@
 
 ![Chainything UI](./media/ui.png)
 
+_Building and running a pipeline from a natural-language prompt in the visual editor:_
+
+![Chainything demo](./media/demo.gif)
+
 Chainything is a Directed Acyclic Graph (DAG) based pipeline execution engine written in Rust.
 
 It allows you to easily chain complex operations (like image processing, data transformation, etc.) in a modular way. The engine automatically calculates the optimal execution order and handles data transfer between different nodes (processors) while maintaining strong typing for the developer.
@@ -21,10 +25,6 @@ It allows you to easily chain complex operations (like image processing, data tr
 - **Extensible:** Simply implement the Processor trait to create your own custom logic blocks.
 
 ## Quick Start
-
-### Visual Node Editor
-
-Here's what the UI looks like in action:
 
 ### Programmatic Usage
 
