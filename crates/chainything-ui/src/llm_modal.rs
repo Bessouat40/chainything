@@ -122,12 +122,12 @@ impl LlmModal {
                                 if message.role == "assistant"
                                     && let Some(extracted_json) =
                                         extract_json_from_markdown(&message.content)
-                                    {
-                                        ui.add_space(4.0);
-                                        if ui.button("Apply").clicked() {
-                                            json_to_apply = Some(extracted_json);
-                                        }
+                                {
+                                    ui.add_space(4.0);
+                                    if ui.button("Apply").clicked() {
+                                        json_to_apply = Some(extracted_json);
                                     }
+                                }
                                 ui.separator();
                             }
                         });
