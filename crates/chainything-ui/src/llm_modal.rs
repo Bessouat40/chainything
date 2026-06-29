@@ -1,8 +1,8 @@
 use egui::*;
-use std::sync::{Arc, Mutex};
 use rig::client::{CompletionClient, ProviderClient};
 use rig::completion::Prompt;
 use rig::providers::ollama;
+use std::sync::{Arc, Mutex};
 
 use crate::agent::prompt::PROMPT;
 use crate::agent::tools::{GetNodeCategories, GetNodesFromCategory};
@@ -120,7 +120,9 @@ impl LlmModal {
                                         .font(TextStyle::Monospace.resolve(ui.style())),
                                 );
                                 if message.role == "assistant" {
-                                    if let Some(extracted_json) = extract_json_from_markdown(&message.content) {
+                                    if let Some(extracted_json) =
+                                        extract_json_from_markdown(&message.content)
+                                    {
                                         ui.add_space(4.0);
                                         if ui.button("Apply").clicked() {
                                             json_to_apply = Some(extracted_json);
@@ -157,10 +159,12 @@ impl LlmModal {
                             let pending = Arc::clone(&self.pending_response);
                             std::thread::spawn(move || {
                                 let result: Result<String, String> = (|| {
-                                    let rt = tokio::runtime::Runtime::new().map_err(|e| e.to_string())?;
-                                    
+                                    let rt = tokio::runtime::Runtime::new()
+                                        .map_err(|e| e.to_string())?;
+
                                     rt.block_on(async {
-                                        let client = ollama::Client::from_env().map_err(|e| e.to_string())?;
+                                        let client = ollama::Client::from_env()
+                                            .map_err(|e| e.to_string())?;
 
                                         let agent = client
                                             .agent("qwen3.5:9b")
@@ -176,7 +180,8 @@ impl LlmModal {
                                             .await
                                             .map_err(|e| e.to_string())
                                     })
-                                })();
+                                })(
+                                );
 
                                 let mut pending_lock = pending.lock().unwrap();
                                 match result {
@@ -220,15 +225,15 @@ impl LlmModal {
     }
 }
 
-    fn extract_json_from_markdown(content: &str) -> Option<String> {
-        let start_tag = "```json";
-        let end_tag = "```";
+fn extract_json_from_markdown(content: &str) -> Option<String> {
+    let start_tag = "```json";
+    let end_tag = "```";
 
-        if let Some(start_idx) = content.find(start_tag) {
-            let content_after_start = &content[start_idx + start_tag.len()..];
-            if let Some(end_idx) = content_after_start.find(end_tag) {
-                return Some(content_after_start[..end_idx].trim().to_string());
-            }
+    if let Some(start_idx) = content.find(start_tag) {
+        let content_after_start = &content[start_idx + start_tag.len()..];
+        if let Some(end_idx) = content_after_start.find(end_tag) {
+            return Some(content_after_start[..end_idx].trim().to_string());
         }
-        None
     }
+    None
+}

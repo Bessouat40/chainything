@@ -1,13 +1,13 @@
 use eframe::egui;
+mod agent;
 mod app;
 mod bottom_panel;
 mod dag_layout;
 mod graph_io;
 mod left_panel;
+mod llm_modal;
 mod nodes;
 mod payload_parser;
-mod agent;
-mod llm_modal;
 
 use app::ChainythingApp;
 

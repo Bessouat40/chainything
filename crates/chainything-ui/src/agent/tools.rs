@@ -1,8 +1,5 @@
 use anyhow::Result;
-use rig::{
-    completion::{ToolDefinition},
-    tool::Tool,
-};
+use rig::{completion::ToolDefinition, tool::Tool};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
@@ -38,7 +35,10 @@ impl Tool for GetNodeCategories {
 
     async fn call(&self, _args: Self::Args) -> Result<Self::Output, Self::Error> {
         println!("[tool-call] Getting node categories");
-        Ok(NodeCategory::ALL.iter().map(|c| c.label().to_string()).collect())
+        Ok(NodeCategory::ALL
+            .iter()
+            .map(|c| c.label().to_string())
+            .collect())
     }
 }
 
@@ -57,7 +57,6 @@ pub struct NodeFromCategory {
     inputs: Vec<String>,
     outputs: Vec<String>,
 }
-
 
 #[derive(Deserialize, Serialize)]
 pub struct GetNodesFromCategory;
@@ -90,9 +89,7 @@ impl Tool for GetNodesFromCategory {
         let nodes = node_registry
             .nodes
             .iter()
-            .filter(|(_name, node)| {
-                node.category().label() == args.category.as_str()
-            })
+            .filter(|(_name, node)| node.category().label() == args.category.as_str())
             .map(|(name, node)| NodeFromCategory {
                 name: name.clone(),
                 inputs: node
