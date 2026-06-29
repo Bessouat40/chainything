@@ -23,6 +23,7 @@ struct PendingResponse {
 pub struct LlmModal {
     pub is_open: bool,
     pub input_text: String,
+    pub model_name: String,
     pub chat_history: Vec<ChatMessage>,
     pub is_loading: bool,
     pub error_message: Option<String>,
@@ -34,6 +35,7 @@ impl LlmModal {
         Self {
             is_open: false,
             input_text: String::new(),
+            model_name: String::new(),
             chat_history: Vec::new(),
             is_loading: false,
             error_message: None,
@@ -141,16 +143,25 @@ impl LlmModal {
                     }
 
                     ui.horizontal(|ui| {
+                        ui.label("Model:");
+                        ui.text_edit_singleline(&mut self.model_name);
+                    });
+
+                    ui.horizontal(|ui| {
                         ui.label("Prompt:");
                         ui.text_edit_singleline(&mut self.input_text);
 
                         if ui
-                            .add_enabled(!self.is_loading, Button::new("Send"))
+                            .add_enabled(
+                                !self.is_loading && !self.model_name.is_empty(),
+                                Button::new("Send"),
+                            )
                             .on_hover_cursor(egui::CursorIcon::PointingHand)
                             .clicked()
                             && !self.input_text.is_empty()
                         {
                             let user_input = self.input_text.clone();
+                            let model_name = self.model_name.clone();
                             self.add_user_message(user_input.clone());
                             self.input_text.clear();
                             self.is_loading = true;
@@ -166,7 +177,7 @@ impl LlmModal {
                                             .map_err(|e| e.to_string())?;
 
                                         let agent = client
-                                            .agent("qwen3.5:9b")
+                                            .agent(model_name.as_str())
                                             .preamble(PROMPT)
                                             .max_tokens(2048)
                                             .default_max_turns(10)
@@ -187,7 +198,6 @@ impl LlmModal {
                                     Ok(response) => pending_lock.response = Some(response),
                                     Err(err) => pending_lock.error = Some(err),
                                 }
-                                println!("response : {:?}", pending_lock.response);
                             });
                         }
 
