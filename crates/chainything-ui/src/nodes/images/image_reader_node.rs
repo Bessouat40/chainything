@@ -36,7 +36,7 @@ impl BaseNode for ImageReaderNode {
     }
 
     fn category(&self) -> NodeCategory {
-        NodeCategory::Image
+        NodeCategory::Reader
     }
 
     fn is_processor(&self) -> bool {

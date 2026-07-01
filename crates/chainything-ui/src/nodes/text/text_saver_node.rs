@@ -39,7 +39,7 @@ impl BaseNode for TextSaveNode {
     }
 
     fn category(&self) -> NodeCategory {
-        NodeCategory::Text
+        NodeCategory::Saver
     }
 
     fn is_processor(&self) -> bool {

@@ -50,7 +50,7 @@ impl BaseNode for TextDisplayNode {
     }
 
     fn category(&self) -> NodeCategory {
-        NodeCategory::Text
+        NodeCategory::Display
     }
 
     fn get_value(&self) -> Option<&Vec<InputOutputType>> {

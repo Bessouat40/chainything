@@ -33,7 +33,7 @@ impl BaseNode for TextInputNode {
     }
 
     fn category(&self) -> NodeCategory {
-        NodeCategory::Text
+        NodeCategory::Reader
     }
 
     fn get_value(&self) -> Option<&Vec<InputOutputType>> {

@@ -36,7 +36,7 @@ impl BaseNode for ModelReaderNode {
     }
 
     fn category(&self) -> NodeCategory {
-        NodeCategory::Model3D
+        NodeCategory::Reader
     }
 
     fn is_processor(&self) -> bool {
