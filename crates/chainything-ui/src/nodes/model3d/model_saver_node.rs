@@ -36,7 +36,7 @@ impl BaseNode for ModelSaveNode {
     }
 
     fn category(&self) -> NodeCategory {
-        NodeCategory::Model3D
+        NodeCategory::Saver
     }
 
     fn is_processor(&self) -> bool {

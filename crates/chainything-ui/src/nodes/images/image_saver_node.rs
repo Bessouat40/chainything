@@ -32,7 +32,7 @@ impl BaseNode for ImageSaveNode {
     }
 
     fn category(&self) -> NodeCategory {
-        NodeCategory::Image
+        NodeCategory::Saver
     }
 
     fn is_processor(&self) -> bool {

@@ -1650,6 +1650,7 @@ dependencies = [
 name = "chainything"
 version = "0.3.0"
 dependencies = [
+ "base64 0.22.1",
  "image",
  "indexmap 2.14.0",
  "serde",

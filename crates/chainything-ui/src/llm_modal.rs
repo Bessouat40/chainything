@@ -162,6 +162,12 @@ impl LlmModal {
                         {
                             let user_input = self.input_text.clone();
                             let model_name = self.model_name.clone();
+                            let message_history_prompt = self
+                                .chat_history
+                                .iter()
+                                .map(|msg| format!("{}: {}", msg.role, msg.content))
+                                .collect::<Vec<String>>()
+                                .join("\n");
                             self.add_user_message(user_input.clone());
                             self.input_text.clear();
                             self.is_loading = true;
@@ -185,8 +191,13 @@ impl LlmModal {
                                             .tool(GetNodesFromCategory)
                                             .build();
 
+                                        let enrich_user_input = format!(
+                                            "Here is the history : {}, and here is the new user input : {}",
+                                            message_history_prompt, user_input
+                                        );
+
                                         agent
-                                            .prompt(user_input.as_str())
+                                            .prompt(enrich_user_input.as_str())
                                             .await
                                             .map_err(|e| e.to_string())
                                     })

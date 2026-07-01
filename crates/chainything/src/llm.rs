@@ -35,6 +35,17 @@ pub trait Llm: Send + Sync {
     /// Generates a completion for the given `prompt`.
     fn generate(&self, prompt: &str) -> Result<String, LlmError>;
 
+    /// Generates a completion for `prompt`, conditioned on one or more images.
+    ///
+    /// Each entry in `images` is a fully-encoded image file (PNG, JPEG, ...).
+    /// Only vision-capable backends (VLMs) need to override this; the default
+    /// implementation reports that the model does not accept images.
+    fn generate_with_images(&self, _prompt: &str, _images: &[Vec<u8>]) -> Result<String, LlmError> {
+        Err(LlmError::Request(
+            "This model does not support image inputs".to_string(),
+        ))
+    }
+
     /// Human-readable identifier of the underlying model (used for logging/UI).
     fn model(&self) -> &str;
 }
@@ -61,6 +72,16 @@ impl LlmHandle {
     /// Generates a completion for `prompt` using the wrapped model.
     pub fn generate(&self, prompt: &str) -> Result<String, LlmError> {
         self.inner.generate(prompt)
+    }
+
+    /// Generates a completion for `prompt`, conditioned on `images` (each a
+    /// fully-encoded image file). Errors on text-only backends.
+    pub fn generate_with_images(
+        &self,
+        prompt: &str,
+        images: &[Vec<u8>],
+    ) -> Result<String, LlmError> {
+        self.inner.generate_with_images(prompt, images)
     }
 
     /// Returns the wrapped model's identifier.

@@ -2,13 +2,17 @@ use std::collections::HashMap;
 
 use crate::processors::{
     images::{
-        blur_processor::BlurProcessor, greyscale_processor::GreyScaleProcessor,
+        blur_processor::BlurProcessor, brightness_processor::BrightnessProcessor,
+        edge_detect_processor::EdgeDetectProcessor, greyscale_processor::GreyScaleProcessor,
         image_reader_processor::ImageReaderProcessor, image_saver_processor::ImageSaveProcessor,
-        resize_processor::ImageResizeProcessor, threshold_processor::ImageThresholdProcessor,
+        invert_processor::InvertProcessor, merge_processor::MergeProcessor,
+        resize_processor::ImageResizeProcessor, rotate_processor::RotateProcessor,
+        threshold_processor::ImageThresholdProcessor,
     },
     llm::{
         llm_generate_processor::LlmGenerateProcessor,
         ollama_loader_processor::OllamaLoaderProcessor,
+        vlm_generate_processor::VlmGenerateProcessor,
     },
     model3d::{
         model_reader_processor::ModelReaderProcessor, model_render_processor::ModelRenderProcessor,
@@ -117,12 +121,36 @@ impl ProcessorRegistry {
             Ok(Box::new(ImageThresholdProcessor::new(id)) as Box<dyn ProcessorBase>)
         });
 
+        registry.register("Invert", |id| {
+            Ok(Box::new(InvertProcessor::new(id)) as Box<dyn ProcessorBase>)
+        });
+
+        registry.register("Rotate", |id| {
+            Ok(Box::new(RotateProcessor::new(id)) as Box<dyn ProcessorBase>)
+        });
+
+        registry.register("Brightness", |id| {
+            Ok(Box::new(BrightnessProcessor::new(id)) as Box<dyn ProcessorBase>)
+        });
+
+        registry.register("EdgeDetect", |id| {
+            Ok(Box::new(EdgeDetectProcessor::new(id)) as Box<dyn ProcessorBase>)
+        });
+
+        registry.register("Merge", |id| {
+            Ok(Box::new(MergeProcessor::new(id)) as Box<dyn ProcessorBase>)
+        });
+
         registry.register("OllamaLoader", |id| {
             Ok(Box::new(OllamaLoaderProcessor::new(id)) as Box<dyn ProcessorBase>)
         });
 
         registry.register("LLMGenerate", |id| {
             Ok(Box::new(LlmGenerateProcessor::new(id)) as Box<dyn ProcessorBase>)
+        });
+
+        registry.register("VLMGenerate", |id| {
+            Ok(Box::new(VlmGenerateProcessor::new(id)) as Box<dyn ProcessorBase>)
         });
 
         registry.register("TextSave", |id| {

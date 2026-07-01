@@ -10,28 +10,32 @@ use egui_snarl::{
     ui::{PinInfo, WireStyle},
 };
 
-/// Visual node wrapping the provider-agnostic `LLMGenerate` processor.
-///
-/// Takes a text *Prompt* (`String`) and a *LLM* handle, calls the model and
-/// outputs the generated *Response* (`String`). Any loader (Ollama, OpenAI,
-/// Mistral, Claude, ...) can be connected to the `LLM` input interchangeably.
-#[derive(Clone)]
-pub struct LlmGenerateNode;
+/// Pin color for `RawImage` inputs.
+const IMAGE_COLOR: egui::Color32 = egui::Color32::from_rgb(100, 200, 100);
 
-impl LlmGenerateNode {
+/// Visual node wrapping the provider-agnostic `VLMGenerate` processor.
+///
+/// Takes a *Raw Image*, a text *Prompt* and a *LLM* handle, asks the vision
+/// language model to describe or reason about the image, and outputs the
+/// generated *Response* (`String`). Any vision-capable loader (e.g.
+/// `OllamaLoader`) can be connected to the `LLM` input interchangeably.
+#[derive(Clone)]
+pub struct VlmGenerateNode;
+
+impl VlmGenerateNode {
     pub fn new() -> Self {
         Self
     }
 }
 
-impl BaseNode for LlmGenerateNode {
+impl BaseNode for VlmGenerateNode {
     fn name(&self) -> &str {
-        "LLMGenerate"
+        "VLMGenerate"
     }
 
     fn informations(&self) -> NodeInformations {
         NodeInformations::new(
-            "Generates text from a prompt using a loaded language model. Connect any LLM loader to the LLM input.",
+            "Generates text from an image and a prompt using a loaded vision language model. Connect any LLM loader to the LLM input.",
         )
     }
 
@@ -48,7 +52,7 @@ impl BaseNode for LlmGenerateNode {
     }
 
     fn inputs_count(&self) -> usize {
-        2
+        3
     }
 
     fn outputs_count(&self) -> usize {
@@ -57,8 +61,9 @@ impl BaseNode for LlmGenerateNode {
 
     fn mapping_input(&self) -> Option<HashMap<usize, InputOutputType>> {
         Some(HashMap::from([
-            (0, InputOutputType::String("".to_string())),
-            (1, InputOutputType::Llm),
+            (0, InputOutputType::RawImage(None)),
+            (1, InputOutputType::String("".to_string())),
+            (2, InputOutputType::Llm),
         ]))
     }
 
@@ -74,6 +79,16 @@ impl BaseNode for LlmGenerateNode {
 
         match pin.id.input {
             0 => {
+                ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |ui| {
+                    ui.label("Raw Image");
+                });
+                PinInfo::circle()
+                    .with_fill(IMAGE_COLOR)
+                    .with_wire_style(WireStyle::AxisAligned {
+                        corner_radius: 10.0,
+                    })
+            }
+            1 => {
                 ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |ui| {
                     ui.label("String");
                 });

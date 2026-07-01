@@ -58,6 +58,9 @@ pub enum NodeCategory {
     Image,
     Llm,
     Model3D,
+    Reader,
+    Display,
+    Saver,
 }
 
 impl NodeCategory {
@@ -68,15 +71,21 @@ impl NodeCategory {
             NodeCategory::Image => "IMAGE",
             NodeCategory::Llm => "LLM",
             NodeCategory::Model3D => "3D",
+            NodeCategory::Reader => "READER",
+            NodeCategory::Display => "DISPLAY",
+            NodeCategory::Saver => "SAVER",
         }
     }
 
     /// Categories in the order they should appear in the library panel.
-    pub const ALL: [NodeCategory; 4] = [
+    pub const ALL: [NodeCategory; 7] = [
         NodeCategory::Text,
         NodeCategory::Image,
         NodeCategory::Llm,
         NodeCategory::Model3D,
+        NodeCategory::Reader,
+        NodeCategory::Display,
+        NodeCategory::Saver,
     ];
 }
 

@@ -107,6 +107,15 @@ impl SnarlViewer<Box<dyn BaseNode>> for DemoViewer {
         snarl: &mut Snarl<Box<dyn BaseNode>>,
     ) {
         ui.label("Node menu");
+        if ui.button("Duplicate").clicked() {
+            let copy = snarl[node].clone();
+            let pos = snarl
+                .get_node_info(node)
+                .map(|info| info.pos + egui::vec2(30.0, 30.0))
+                .unwrap_or(egui::Pos2::ZERO);
+            snarl.insert_node(pos, copy);
+            ui.close();
+        }
         if ui.button("Remove").clicked() {
             snarl.remove_node(node);
             ui.close();

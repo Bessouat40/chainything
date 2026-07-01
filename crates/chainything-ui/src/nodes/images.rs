@@ -1,7 +1,12 @@
 pub mod blur_node;
+pub mod brightness_node;
+pub mod edge_detect_node;
 pub mod greyscale_node;
 pub mod image_display_node;
 pub mod image_reader_node;
 pub mod image_saver_node;
+pub mod invert_node;
+pub mod merge_node;
 pub mod resize_node;
+pub mod rotate_node;
 pub mod threshold_node;

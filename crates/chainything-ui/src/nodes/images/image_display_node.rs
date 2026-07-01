@@ -111,7 +111,7 @@ impl BaseNode for ImageDisplayNode {
     }
 
     fn category(&self) -> NodeCategory {
-        NodeCategory::Image
+        NodeCategory::Display
     }
 
     fn get_value(&self) -> Option<&Vec<InputOutputType>> {
