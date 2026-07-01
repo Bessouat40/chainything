@@ -5,6 +5,7 @@ pub mod greyscale_processor;
 pub mod image_reader_processor;
 pub mod image_saver_processor;
 pub mod invert_processor;
+pub mod merge_processor;
 pub mod resize_processor;
 pub mod rotate_processor;
 pub mod threshold_processor;

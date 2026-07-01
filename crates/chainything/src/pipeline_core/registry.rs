@@ -5,8 +5,9 @@ use crate::processors::{
         blur_processor::BlurProcessor, brightness_processor::BrightnessProcessor,
         edge_detect_processor::EdgeDetectProcessor, greyscale_processor::GreyScaleProcessor,
         image_reader_processor::ImageReaderProcessor, image_saver_processor::ImageSaveProcessor,
-        invert_processor::InvertProcessor, resize_processor::ImageResizeProcessor,
-        rotate_processor::RotateProcessor, threshold_processor::ImageThresholdProcessor,
+        invert_processor::InvertProcessor, merge_processor::MergeProcessor,
+        resize_processor::ImageResizeProcessor, rotate_processor::RotateProcessor,
+        threshold_processor::ImageThresholdProcessor,
     },
     llm::{
         llm_generate_processor::LlmGenerateProcessor,
@@ -133,6 +134,10 @@ impl ProcessorRegistry {
 
         registry.register("EdgeDetect", |id| {
             Ok(Box::new(EdgeDetectProcessor::new(id)) as Box<dyn ProcessorBase>)
+        });
+
+        registry.register("Merge", |id| {
+            Ok(Box::new(MergeProcessor::new(id)) as Box<dyn ProcessorBase>)
         });
 
         registry.register("OllamaLoader", |id| {

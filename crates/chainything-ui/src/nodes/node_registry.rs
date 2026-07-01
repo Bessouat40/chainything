@@ -6,8 +6,8 @@ use crate::nodes::{
         blur_node::BlurNode, brightness_node::BrightnessNode, edge_detect_node::EdgeDetectNode,
         greyscale_node::GreyScaleNode, image_display_node::ImageDisplayNode,
         image_reader_node::ImageReaderNode, image_saver_node::ImageSaveNode,
-        invert_node::InvertNode, resize_node::ResizeNode, rotate_node::RotateNode,
-        threshold_node::ThresholdNode,
+        invert_node::InvertNode, merge_node::MergeNode, resize_node::ResizeNode,
+        rotate_node::RotateNode, threshold_node::ThresholdNode,
     },
     llm::{llm_generate_node::LlmGenerateNode, ollama_loader_node::OllamaLoaderNode},
     model3d::{
@@ -79,6 +79,10 @@ impl NodeRegistry {
             (
                 EdgeDetectNode::new().name().to_string(),
                 Box::new(EdgeDetectNode::new()) as Box<dyn BaseNode>,
+            ),
+            (
+                MergeNode::new().name().to_string(),
+                Box::new(MergeNode::new()) as Box<dyn BaseNode>,
             ),
             (
                 OllamaLoaderNode::new().name().to_string(),
