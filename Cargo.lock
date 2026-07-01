@@ -1648,7 +1648,7 @@ dependencies = [
 
 [[package]]
 name = "chainything"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "base64 0.22.1",
  "image",
@@ -1660,7 +1660,7 @@ dependencies = [
 
 [[package]]
 name = "chainything-ui"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "anyhow",
  "chainything",
