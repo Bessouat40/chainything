@@ -65,6 +65,41 @@ impl Llm for OllamaLlm {
             })
     }
 
+    fn generate_with_images(&self, prompt: &str, images: &[Vec<u8>]) -> Result<String, LlmError> {
+        use base64::Engine;
+
+        let url = format!("{}/api/generate", self.host.trim_end_matches('/'));
+
+        let encoded: Vec<String> = images
+            .iter()
+            .map(|bytes| base64::engine::general_purpose::STANDARD.encode(bytes))
+            .collect();
+
+        let agent = ureq::AgentBuilder::new()
+            .timeout(Duration::from_secs(REQUEST_TIMEOUT_SECS))
+            .build();
+
+        let response: serde_json::Value = agent
+            .post(&url)
+            .send_json(serde_json::json!({
+                "model": self.model,
+                "prompt": prompt,
+                "images": encoded,
+                "stream": false,
+            }))
+            .map_err(|e| LlmError::Request(format!("Ollama request to {} failed: {}", url, e)))?
+            .into_json()
+            .map_err(|e| LlmError::Response(format!("Failed to parse Ollama response: {}", e)))?;
+
+        response
+            .get("response")
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_string())
+            .ok_or_else(|| {
+                LlmError::Response("Ollama response did not contain a 'response' field".to_string())
+            })
+    }
+
     fn model(&self) -> &str {
         &self.model
     }

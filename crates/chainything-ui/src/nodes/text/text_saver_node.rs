@@ -71,7 +71,7 @@ impl BaseNode for TextSaveNode {
 
     fn show_input(&mut self, _pin: &InPin, ui: &mut Ui) -> PinInfo {
         ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |ui| {
-            ui.label("Text");
+            ui.label("String");
             ui.add_space(5.0);
         });
 

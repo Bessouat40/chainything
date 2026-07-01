@@ -11,6 +11,7 @@ Fill payload with dummy data for the parameters, the user will fix it later.
 ## IMPORTANT RULE
 Don't invent nodes, you can only use the nodes that are available in the software. If you don't know a node, you can't use it.
 Available nodes are only listed by the tools you have access to, you can use the tools to get the list of available nodes and their properties.
+Only generate one ```json ``` block per response, do not generate multiple blocks.
 
 # Tools
 You have tools :

@@ -12,6 +12,7 @@ use crate::processors::{
     llm::{
         llm_generate_processor::LlmGenerateProcessor,
         ollama_loader_processor::OllamaLoaderProcessor,
+        vlm_generate_processor::VlmGenerateProcessor,
     },
     model3d::{
         model_reader_processor::ModelReaderProcessor, model_render_processor::ModelRenderProcessor,
@@ -146,6 +147,10 @@ impl ProcessorRegistry {
 
         registry.register("LLMGenerate", |id| {
             Ok(Box::new(LlmGenerateProcessor::new(id)) as Box<dyn ProcessorBase>)
+        });
+
+        registry.register("VLMGenerate", |id| {
+            Ok(Box::new(VlmGenerateProcessor::new(id)) as Box<dyn ProcessorBase>)
         });
 
         registry.register("TextSave", |id| {

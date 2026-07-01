@@ -73,8 +73,8 @@ impl BaseNode for MergeNode {
         ui.set_min_width(180.0);
 
         let label = match pin.id.input {
-            0 => "Base Image",
-            _ => "Overlay Image",
+            0 => "Raw Image",
+            _ => "Raw Image",
         };
 
         ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |ui| {

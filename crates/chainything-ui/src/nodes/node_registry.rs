@@ -9,7 +9,10 @@ use crate::nodes::{
         invert_node::InvertNode, merge_node::MergeNode, resize_node::ResizeNode,
         rotate_node::RotateNode, threshold_node::ThresholdNode,
     },
-    llm::{llm_generate_node::LlmGenerateNode, ollama_loader_node::OllamaLoaderNode},
+    llm::{
+        llm_generate_node::LlmGenerateNode, ollama_loader_node::OllamaLoaderNode,
+        vlm_generate_node::VlmGenerateNode,
+    },
     model3d::{
         model_reader_node::ModelReaderNode, model_render_node::ModelRenderNode,
         model_saver_node::ModelSaveNode, model_scale_node::ModelScaleNode,
@@ -91,6 +94,10 @@ impl NodeRegistry {
             (
                 LlmGenerateNode::new().name().to_string(),
                 Box::new(LlmGenerateNode::new()) as Box<dyn BaseNode>,
+            ),
+            (
+                VlmGenerateNode::new().name().to_string(),
+                Box::new(VlmGenerateNode::new()) as Box<dyn BaseNode>,
             ),
             (
                 TextSaveNode::new().name().to_string(),
