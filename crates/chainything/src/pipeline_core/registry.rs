@@ -2,9 +2,11 @@ use std::collections::HashMap;
 
 use crate::processors::{
     images::{
-        blur_processor::BlurProcessor, greyscale_processor::GreyScaleProcessor,
+        blur_processor::BlurProcessor, brightness_processor::BrightnessProcessor,
+        edge_detect_processor::EdgeDetectProcessor, greyscale_processor::GreyScaleProcessor,
         image_reader_processor::ImageReaderProcessor, image_saver_processor::ImageSaveProcessor,
-        resize_processor::ImageResizeProcessor, threshold_processor::ImageThresholdProcessor,
+        invert_processor::InvertProcessor, resize_processor::ImageResizeProcessor,
+        rotate_processor::RotateProcessor, threshold_processor::ImageThresholdProcessor,
     },
     llm::{
         llm_generate_processor::LlmGenerateProcessor,
@@ -115,6 +117,22 @@ impl ProcessorRegistry {
 
         registry.register("Threshold", |id| {
             Ok(Box::new(ImageThresholdProcessor::new(id)) as Box<dyn ProcessorBase>)
+        });
+
+        registry.register("Invert", |id| {
+            Ok(Box::new(InvertProcessor::new(id)) as Box<dyn ProcessorBase>)
+        });
+
+        registry.register("Rotate", |id| {
+            Ok(Box::new(RotateProcessor::new(id)) as Box<dyn ProcessorBase>)
+        });
+
+        registry.register("Brightness", |id| {
+            Ok(Box::new(BrightnessProcessor::new(id)) as Box<dyn ProcessorBase>)
+        });
+
+        registry.register("EdgeDetect", |id| {
+            Ok(Box::new(EdgeDetectProcessor::new(id)) as Box<dyn ProcessorBase>)
         });
 
         registry.register("OllamaLoader", |id| {

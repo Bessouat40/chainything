@@ -3,9 +3,11 @@ use std::collections::HashMap;
 use crate::nodes::{
     base_node::BaseNode,
     images::{
-        blur_node::BlurNode, greyscale_node::GreyScaleNode, image_display_node::ImageDisplayNode,
+        blur_node::BlurNode, brightness_node::BrightnessNode, edge_detect_node::EdgeDetectNode,
+        greyscale_node::GreyScaleNode, image_display_node::ImageDisplayNode,
         image_reader_node::ImageReaderNode, image_saver_node::ImageSaveNode,
-        resize_node::ResizeNode, threshold_node::ThresholdNode,
+        invert_node::InvertNode, resize_node::ResizeNode, rotate_node::RotateNode,
+        threshold_node::ThresholdNode,
     },
     llm::{llm_generate_node::LlmGenerateNode, ollama_loader_node::OllamaLoaderNode},
     model3d::{
@@ -61,6 +63,22 @@ impl NodeRegistry {
             (
                 ThresholdNode::new().name().to_string(),
                 Box::new(ThresholdNode::new()) as Box<dyn BaseNode>,
+            ),
+            (
+                InvertNode::new().name().to_string(),
+                Box::new(InvertNode::new()) as Box<dyn BaseNode>,
+            ),
+            (
+                RotateNode::new().name().to_string(),
+                Box::new(RotateNode::new()) as Box<dyn BaseNode>,
+            ),
+            (
+                BrightnessNode::new().name().to_string(),
+                Box::new(BrightnessNode::new()) as Box<dyn BaseNode>,
+            ),
+            (
+                EdgeDetectNode::new().name().to_string(),
+                Box::new(EdgeDetectNode::new()) as Box<dyn BaseNode>,
             ),
             (
                 OllamaLoaderNode::new().name().to_string(),
