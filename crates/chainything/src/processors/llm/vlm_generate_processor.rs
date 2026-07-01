@@ -62,7 +62,9 @@ impl VlmGenerateProcessor {
 
         dynamic
             .write_to(&mut Cursor::new(&mut buffer), image::ImageFormat::Png)
-            .map_err(|e| ProcessorError::ComputingError(format!("Failed to encode image: {}", e)))?;
+            .map_err(|e| {
+                ProcessorError::ComputingError(format!("Failed to encode image: {}", e))
+            })?;
 
         Ok(buffer)
     }

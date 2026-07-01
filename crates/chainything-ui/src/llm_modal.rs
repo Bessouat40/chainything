@@ -190,7 +190,6 @@ impl LlmModal {
                                             .tool(GetNodeCategories)
                                             .tool(GetNodesFromCategory)
                                             .build();
-                                        
 
                                         let enrich_user_input = format!(
                                             "Here is the history : {}, and here is the new user input : {}",
