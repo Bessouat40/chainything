@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use chainything::processors::images::greyscale_processor::RawImage;
 use chainything::processors::model3d::mesh::Mesh3D;
 use egui::{Color32, Ui};
-use egui_snarl::{InPin, NodeId, OutPin, Snarl, ui::PinInfo};
+use egui_snarl::{InPin, NodeId, OutPin, ui::PinInfo};
 
 pub const STRING_COLOR: Color32 = Color32::from_rgb(0x00, 0xb0, 0x00);
 pub const LLM_COLOR: Color32 = Color32::from_rgb(0xd0, 0x80, 0x20);

@@ -105,12 +105,11 @@ impl BaseNode for MergeNode {
     }
 
     fn show_body(
-        &self,
+        &mut self,
         _node: egui_snarl::NodeId,
         _inputs: &[InPin],
         _outputs: &[OutPin],
         ui: &mut Ui,
-        _snarl: &egui_snarl::Snarl<Box<dyn BaseNode>>,
     ) {
         ui.horizontal(|ui| {
             ui.label("Alpha:");

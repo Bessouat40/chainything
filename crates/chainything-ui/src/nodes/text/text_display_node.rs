@@ -7,7 +7,7 @@ use crate::nodes::base_node::{
 
 use egui::Ui;
 use egui_snarl::{
-    InPin, NodeId, OutPin, Snarl,
+    InPin, NodeId, OutPin,
     ui::{PinInfo, WireStyle},
 };
 

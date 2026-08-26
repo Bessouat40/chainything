@@ -7,7 +7,6 @@ mod graph_io;
 mod left_panel;
 mod llm_modal;
 mod nodes;
-mod payload_parser;
 
 use app::ChainythingApp;
 
