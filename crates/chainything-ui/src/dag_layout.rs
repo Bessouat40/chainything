@@ -26,6 +26,9 @@ pub struct DAGLayout {
     running: Arc<Mutex<bool>>,
     result: Arc<Mutex<Option<Result<ExecOutput, String>>>>,
     bindings: Vec<DisplayBinding>,
+    /// Path from the root graph into a nested loop body currently being edited.
+    /// Empty means the main graph is shown; each entry drills one `ForEach` deeper.
+    editing: Vec<NodeId>,
 }
 
 impl Default for DAGLayout {
@@ -45,15 +48,75 @@ impl DAGLayout {
             running: Arc::new(Mutex::new(false)),
             result: Arc::new(Mutex::new(None)),
             bindings: Vec::new(),
+            editing: Vec::new(),
         }
     }
 
+    /// Returns the graph the library panel should add nodes to: the main graph,
+    /// or the nested loop body currently drilled into. The registry is the same
+    /// at every level, so nodes are added consistently.
     pub fn get_snarl_and_registry(&mut self) -> (&mut Snarl<Box<dyn BaseNode>>, &NodeRegistry) {
-        (&mut self.snarl, &self.viewer.node_registry)
+        let depth = valid_editing_depth(&self.snarl, &self.editing);
+        self.editing.truncate(depth);
+        let registry = &self.viewer.node_registry;
+        let mut cur = &mut self.snarl;
+        for &id in &self.editing {
+            cur = cur
+                .get_node_mut(id)
+                .and_then(|node| node.sub_snarl_mut())
+                .expect("editing depth validated above");
+        }
+        (cur, registry)
     }
 
     pub fn show(&mut self, ui: &mut Ui) {
-        SnarlWidget::new().show(&mut self.snarl, &mut self.viewer, ui);
+        // Drop any editing-stack entries left stale by a removed ForEach.
+        let depth = valid_editing_depth(&self.snarl, &self.editing);
+        self.editing.truncate(depth);
+
+        // Breadcrumb + Back bar while editing a loop body.
+        if !self.editing.is_empty() {
+            ui.horizontal(|ui| {
+                let back = ui.button("⬅ Back").clicked();
+                ui.separator();
+                ui.label(self.breadcrumb_label());
+                if back {
+                    self.editing.pop();
+                }
+            });
+            ui.separator();
+        }
+
+        // Render the currently active graph (main or the drilled-into loop body).
+        let viewer = &mut self.viewer;
+        let mut cur = &mut self.snarl;
+        for &id in &self.editing {
+            cur = cur
+                .get_node_mut(id)
+                .and_then(|node| node.sub_snarl_mut())
+                .expect("editing depth validated above");
+        }
+        SnarlWidget::new().show(cur, viewer, ui);
+
+        // A node menu may have asked to edit a loop body: drill in from next frame.
+        if let Some(target) = self.viewer.enter_request.take() {
+            self.editing.push(target);
+        }
+    }
+
+    /// Human-readable path shown in the breadcrumb, e.g. `Main › ForEach`.
+    fn breadcrumb_label(&self) -> String {
+        let mut parts = vec!["Main".to_string()];
+        let mut cur = &self.snarl;
+        for &id in &self.editing {
+            let Some(node) = cur.get_node(id) else { break };
+            parts.push(node.name().to_string());
+            match node.sub_snarl() {
+                Some(sub) => cur = sub,
+                None => break,
+            }
+        }
+        parts.join(" › ")
     }
 
     pub fn export_to_json(&self) -> String {
@@ -111,12 +174,15 @@ impl DAGLayout {
         // The previous run's display bindings reference nodes that no longer
         // exist; drop them so stale results aren't routed into the new graph.
         self.bindings.clear();
+        // Any drilled-into loop body belongs to the replaced graph; return to root.
+        self.editing.clear();
     }
 
     /// Loads a graph from a JSON string.
     pub fn load_graph_from_json(&mut self, json: &str) -> Result<(), String> {
         crate::graph_io::deserialize_graph(json, &self.viewer.node_registry, &mut self.snarl)?;
         self.bindings.clear();
+        self.editing.clear();
         Ok(())
     }
 
@@ -126,6 +192,7 @@ impl DAGLayout {
         // The previous run's display bindings reference nodes that no longer
         // exist; drop them so stale results aren't routed into the empty graph.
         self.bindings.clear();
+        self.editing.clear();
     }
 
     /// `true` while a pipeline run is in progress on the background thread.
@@ -199,7 +266,7 @@ impl DAGLayout {
 
 /// Builds the pipeline from JSON, executes it and returns every output.
 fn run_pipeline_collect(json: &str) -> Result<ExecOutput, String> {
-    let registry = ProcessorRegistry::with_standard_processors();
+    let registry = std::sync::Arc::new(ProcessorRegistry::with_standard_processors());
     let mut pipeline = PipelineBuilder::build_from_json(json, &registry)
         .map_err(|e| format!("build error: {:?}", e))?;
     pipeline
@@ -316,15 +383,25 @@ pub fn generate_payload(snarl: &Snarl<Box<dyn BaseNode>>) -> GraphPayload {
             }
         }
 
-        let mut params = None;
-        if let Some(param_value) = node.get_parameter(0) {
+        // A node hosting a sub-editor (ForEach) exports its loop body as a nested
+        // `sub_pipeline` and derives its wiring params from that body, instead of
+        // the generic `param_N` collection used by ordinary nodes.
+        let (params, sub_pipeline) = if let Some(body) = node.sub_snarl() {
             let mut params_map = HashMap::new();
             params_map.insert(
-                "param_0".to_string(),
-                serde_json::Value::String(param_value),
+                "input_node".to_string(),
+                serde_json::Value::String(find_subnode_id(body, "ItemInput").unwrap_or_default()),
             );
-
-            let mut idx = 1;
+            params_map.insert(
+                "output_node".to_string(),
+                serde_json::Value::String(find_subnode_id(body, "ItemOutput").unwrap_or_default()),
+            );
+            // Read as a JSON number by the backend, so emit a number (not a string).
+            params_map.insert("output_slot".to_string(), serde_json::Value::from(0u64));
+            (Some(params_map), Some(generate_payload(body)))
+        } else {
+            let mut params_map = HashMap::new();
+            let mut idx = 0;
             while let Some(param_value) = node.get_parameter(idx) {
                 params_map.insert(
                     format!("param_{}", idx),
@@ -332,18 +409,48 @@ pub fn generate_payload(snarl: &Snarl<Box<dyn BaseNode>>) -> GraphPayload {
                 );
                 idx += 1;
             }
-
-            if !params_map.is_empty() {
-                params = Some(params_map);
-            }
-        }
+            let params = (!params_map.is_empty()).then_some(params_map);
+            (params, None)
+        };
 
         payload.nodes.push(NodePayload {
             id: current_node_str_id,
             node_type: node.name().replace("Node", ""),
             inputs: inputs_payload,
             params,
+            sub_pipeline,
         });
     }
     payload
+}
+
+/// Finds a sub-node's exported id (its positional index, as a string) by node name.
+///
+/// The id must match the one [`generate_payload`] assigns, so it uses the same
+/// `node_ids()` enumeration order. Returns `None` if no such node exists (e.g. the
+/// user removed the `ItemInput`/`ItemOutput` marker from a loop body).
+fn find_subnode_id(snarl: &Snarl<Box<dyn BaseNode>>, name: &str) -> Option<String> {
+    snarl
+        .node_ids()
+        .enumerate()
+        .find(|(_, (_, node))| node.name() == name)
+        .map(|(index, _)| index.to_string())
+}
+
+/// How deep an editing path still resolves to real nested graphs, walking from
+/// `root`. Used to trim ids left dangling when a `ForEach` is removed, so the
+/// mutable walk that drills in never panics.
+fn valid_editing_depth(root: &Snarl<Box<dyn BaseNode>>, stack: &[NodeId]) -> usize {
+    let mut cur = root;
+    let mut depth = 0;
+    for &id in stack {
+        match cur.get_node(id).and_then(|node| node.sub_snarl()) {
+            Some(sub) => {
+                cur = sub;
+                depth += 1;
+            }
+            None => break,
+        }
+    }
+    depth
 }

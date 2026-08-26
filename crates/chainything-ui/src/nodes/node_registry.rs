@@ -7,6 +7,10 @@ use crate::nodes::{
         image_reader_node::ImageReaderNode, image_saver_node::ImageSaveNode,
         resize_node::ResizeNode, threshold_node::ThresholdNode,
     },
+    iter::{
+        foreach_node::ForEachNode, item_input_node::ItemInputNode,
+        item_output_node::ItemOutputNode,
+    },
     llm::{llm_generate_node::LlmGenerateNode, ollama_loader_node::OllamaLoaderNode},
     model3d::{
         model_reader_node::ModelReaderNode, model_render_node::ModelRenderNode,
@@ -93,6 +97,18 @@ impl NodeRegistry {
             (
                 ModelSaveNode::new().name().to_string(),
                 Box::new(ModelSaveNode::new()) as Box<dyn BaseNode>,
+            ),
+            (
+                ForEachNode::new().name().to_string(),
+                Box::new(ForEachNode::new()) as Box<dyn BaseNode>,
+            ),
+            (
+                ItemInputNode::new().name().to_string(),
+                Box::new(ItemInputNode::new()) as Box<dyn BaseNode>,
+            ),
+            (
+                ItemOutputNode::new().name().to_string(),
+                Box::new(ItemOutputNode::new()) as Box<dyn BaseNode>,
             ),
         ]
         .into_iter()

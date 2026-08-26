@@ -1652,6 +1652,7 @@ version = "0.3.0"
 dependencies = [
  "image",
  "indexmap 2.14.0",
+ "rayon",
  "serde",
  "serde_json",
  "ureq 2.12.1",

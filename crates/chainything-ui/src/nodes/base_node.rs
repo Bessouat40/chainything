@@ -9,6 +9,10 @@ use egui_snarl::{InPin, NodeId, OutPin, Snarl, ui::PinInfo};
 pub const STRING_COLOR: Color32 = Color32::from_rgb(0x00, 0xb0, 0x00);
 pub const LLM_COLOR: Color32 = Color32::from_rgb(0xd0, 0x80, 0x20);
 pub const MESH_COLOR: Color32 = Color32::from_rgb(0x40, 0x90, 0xd0);
+/// Pin colour for a materialized collection (`Vec` of elements).
+pub const LIST_COLOR: Color32 = Color32::from_rgb(0xc0, 0x60, 0xe0);
+/// Pin colour for a single loop element (wildcard, connects to any type).
+pub const ITEM_COLOR: Color32 = Color32::from_rgb(0xe0, 0xc0, 0x40);
 
 #[derive(Clone)]
 pub enum InputOutputType {
@@ -21,6 +25,13 @@ pub enum InputOutputType {
     /// A 3D triangle mesh, produced by a model reader and consumed by transform
     /// or save nodes.
     Mesh3D(Option<Mesh3D>),
+    /// A materialized collection, produced by a generator node and consumed by a
+    /// [`ForEach`](super::iter::foreach_node::ForEachNode) node.
+    List,
+    /// A single element flowing inside a `ForEach` loop body. It is a wildcard:
+    /// the concrete element type is only known at run time, so it may connect to a
+    /// pin of any type (see [`InputOutputType::connects_to`]).
+    Item,
 }
 
 impl InputOutputType {
@@ -30,7 +41,21 @@ impl InputOutputType {
             InputOutputType::RawImage(_) => "RawImage",
             InputOutputType::Llm => "LLM",
             InputOutputType::Mesh3D(_) => "Mesh3D",
+            InputOutputType::List => "List",
+            InputOutputType::Item => "Item",
         }
+    }
+
+    /// Whether an output of type `self` may feed an input of type `other`.
+    ///
+    /// Types must match by discriminant, except that [`Item`](InputOutputType::Item)
+    /// is a wildcard on either side: the element leaving an `ItemInput` (or entering
+    /// an `ItemOutput`) has a run-time-only type, so it connects to any pin.
+    pub fn connects_to(&self, other: &InputOutputType) -> bool {
+        use std::mem::discriminant;
+        matches!(self, InputOutputType::Item)
+            || matches!(other, InputOutputType::Item)
+            || discriminant(self) == discriminant(other)
     }
 }
 
@@ -58,6 +83,8 @@ pub enum NodeCategory {
     Image,
     Llm,
     Model3D,
+    /// Control-flow nodes: `ForEach` and its sub-pipeline markers.
+    Flow,
 }
 
 impl NodeCategory {
@@ -68,15 +95,17 @@ impl NodeCategory {
             NodeCategory::Image => "IMAGE",
             NodeCategory::Llm => "LLM",
             NodeCategory::Model3D => "3D",
+            NodeCategory::Flow => "FLOW",
         }
     }
 
     /// Categories in the order they should appear in the library panel.
-    pub const ALL: [NodeCategory; 4] = [
+    pub const ALL: [NodeCategory; 5] = [
         NodeCategory::Text,
         NodeCategory::Image,
         NodeCategory::Llm,
         NodeCategory::Model3D,
+        NodeCategory::Flow,
     ];
 }
 
@@ -136,6 +165,31 @@ pub trait BaseNode: DynClone {
     /// (and their GPU textures) are freed and the graph shows fresh output.
     /// The default is a no-op.
     fn clear_display(&self) {}
+
+    /// Whether this node hosts an editable sub-pipeline (a nested graph).
+    ///
+    /// Only `ForEach` returns `true`. It makes the node menu offer "Edit loop
+    /// body" and lets the editor drill into the nested graph. The default is
+    /// `false`, so no existing node is affected.
+    fn has_sub_editor(&self) -> bool {
+        false
+    }
+
+    /// The nested sub-pipeline graph, if this node hosts one.
+    ///
+    /// Used by the payload exporter and the on-disk serializer to recurse into
+    /// the loop body. The default is `None`.
+    fn sub_snarl(&self) -> Option<&Snarl<Box<dyn BaseNode>>> {
+        None
+    }
+
+    /// Mutable access to the nested sub-pipeline graph, if any.
+    ///
+    /// Used by the editor to drill into the loop body and by the importer to
+    /// rebuild it. The default is `None`.
+    fn sub_snarl_mut(&mut self) -> Option<&mut Snarl<Box<dyn BaseNode>>> {
+        None
+    }
 }
 
 dyn_clone::clone_trait_object!(BaseNode);

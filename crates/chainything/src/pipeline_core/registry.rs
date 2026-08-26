@@ -18,9 +18,15 @@ use crate::processors::{
 };
 
 use crate::processors::base_processor::ProcessorBase;
+use crate::processors::iter::{ItemInputProcessor, ItemOutputProcessor};
 
 /// Type alias for a function/closure that creates a boxed processor instance.
-type ProcessorConstructor = Box<dyn Fn(String) -> Result<Box<dyn ProcessorBase>, String>>;
+///
+/// The `Send + Sync` bounds make the whole [`ProcessorRegistry`] shareable across
+/// threads, which is what lets [`ForEachProcessor`](crate::processors::iter::ForEachProcessor)
+/// hold an `Arc<ProcessorRegistry>` and rebuild a sub-pipeline per element in parallel.
+type ProcessorConstructor =
+    Box<dyn Fn(String) -> Result<Box<dyn ProcessorBase>, String> + Send + Sync>;
 
 /// A registry responsible for mapping node type strings to processor factory functions.
 ///
@@ -62,7 +68,7 @@ impl ProcessorRegistry {
     /// ```
     pub fn register<F>(&mut self, node_type: &str, constructor: F)
     where
-        F: Fn(String) -> Result<Box<dyn ProcessorBase>, String> + 'static,
+        F: Fn(String) -> Result<Box<dyn ProcessorBase>, String> + Send + Sync + 'static,
     {
         self.constructors
             .insert(node_type.to_string(), Box::new(constructor));
@@ -143,6 +149,18 @@ impl ProcessorRegistry {
 
         registry.register("ModelRender", |id| {
             Ok(Box::new(ModelRenderProcessor::new(id)) as Box<dyn ProcessorBase>)
+        });
+
+        // Entry point for a `ForEach` sub-pipeline: a passthrough whose output is
+        // the element `ForEach` injects for the current iteration.
+        registry.register("ItemInput", |id| {
+            Ok(Box::new(ItemInputProcessor::new(id)) as Box<dyn ProcessorBase>)
+        });
+
+        // Terminal of a `ForEach` sub-pipeline: a passthrough whose input becomes
+        // the per-element result `ForEach` collects.
+        registry.register("ItemOutput", |id| {
+            Ok(Box::new(ItemOutputProcessor::new(id)) as Box<dyn ProcessorBase>)
         });
 
         registry

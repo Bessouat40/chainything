@@ -10,6 +10,11 @@ pub mod prelude {
     pub use crate::llm::ollama::OllamaLlm;
     pub use crate::llm::{Llm, LlmError, LlmHandle};
 
+    pub use crate::processors::base_processor::{ErasedItem, ErasedList};
+    pub use crate::processors::iter::{
+        ForEachProcessor, ItemError, ItemInputProcessor, ItemOutputProcessor,
+    };
+
     pub use crate::processors::images::greyscale_processor::GreyScaleProcessor;
     pub use crate::processors::images::image_reader_processor::ImageReaderProcessor;
     pub use crate::processors::images::image_saver_processor::ImageSaveProcessor;

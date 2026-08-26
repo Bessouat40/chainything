@@ -14,6 +14,10 @@ pub struct NodePayload {
     pub inputs: Vec<InputPayload>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub params: Option<HashMap<String, serde_json::Value>>,
+    /// Nested loop body for a `ForEach` node. Absent for every other node, so the
+    /// backend's `JsonNodeDef::sub_pipeline` stays `None` and nothing else changes.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sub_pipeline: Option<GraphPayload>,
 }
 
 #[derive(Serialize, Debug)]

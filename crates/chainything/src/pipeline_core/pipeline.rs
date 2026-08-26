@@ -1,4 +1,4 @@
-use crate::processors::base_processor::{ProcessorBase, ProcessorError};
+use crate::processors::base_processor::{ErasedItem, ProcessorBase, ProcessorError};
 use std::{
     any::Any,
     collections::{HashMap, VecDeque},
@@ -230,6 +230,26 @@ impl Pipeline {
             .iter()
             .map(|(id, processor)| (id.clone(), processor.get_output_erased()))
             .collect()
+    }
+
+    /// Injects a static value as an additional input on an existing node.
+    ///
+    /// Used to feed a per-iteration element into a sub-pipeline's entry node (an
+    /// `ItemInput`) before [`execute`](Self::execute): the value is appended as an
+    /// [`InputSource::Static`], so the target node receives it exactly as if it had
+    /// been wired in the JSON. Call before planning — it participates in the
+    /// topological sort like any other input.
+    ///
+    /// # Errors
+    /// * [`PipelineErrors::UnknownProcessor`] if no node with `node_id` exists.
+    pub fn inject_static(&mut self, node_id: &str, value: ErasedItem) -> Result<(), PipelineErrors> {
+        let config = self
+            .connections
+            .iter_mut()
+            .find(|c| c.id == node_id)
+            .ok_or_else(|| PipelineErrors::UnknownProcessor(node_id.to_string()))?;
+        config.inputs.push(InputSource::Static(value));
+        Ok(())
     }
 
     /// Retrieves configuration for a specific node ID.

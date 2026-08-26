@@ -38,7 +38,7 @@ fn main() {
         ]
         }"#;
 
-    let registry = ProcessorRegistry::with_standard_processors();
+    let registry = std::sync::Arc::new(ProcessorRegistry::with_standard_processors());
 
     match PipelineBuilder::build_from_json(json_data, &registry) {
         Ok(mut pipeline) => {

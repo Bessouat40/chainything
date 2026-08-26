@@ -1,5 +1,21 @@
 use std::{any::Any, sync::Arc};
 
+/// A single type-erased value flowing between processors.
+///
+/// This is the universal currency of the pipeline: every input and output slot
+/// carries one of these. Cloning is cheap (it bumps an `Arc` refcount), which is
+/// what lets higher-order processors like `ForEach` fan a value out to many
+/// sub-pipeline instances without copying the underlying data.
+pub type ErasedItem = Arc<dyn Any + Send + Sync>;
+
+/// A materialized collection of [`ErasedItem`]s — the "iterator/vec" payload.
+///
+/// A generator processor produces one of these (wrapped as `Arc<ErasedList>` so
+/// it can travel through an output slot), and `ForEach` consumes it, applying a
+/// sub-pipeline to each element. It is a `Vec` (not a lazy iterator) so it can be
+/// walked in parallel with rayon's work-stealing.
+pub type ErasedList = Vec<ErasedItem>;
+
 /// Type-erased counterpart to [`Processor`], enabling dynamic dispatch in heterogeneous pipelines.
 ///
 /// Automatically implemented for any type that implements [`Processor`] via a blanket impl.

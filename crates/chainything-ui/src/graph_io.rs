@@ -27,6 +27,11 @@ pub struct NodeEntry {
     /// Editable parameters, indexed as in [`BaseNode::get_parameter`].
     #[serde(default)]
     pub params: Vec<String>,
+    /// Nested loop body for a node that hosts one (`ForEach`). Absent for every
+    /// ordinary node. `Vec` inside [`GraphFile`] breaks the recursion's size, so
+    /// no boxing is needed.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sub_graph: Option<GraphFile>,
 }
 
 fn default_open() -> bool {
@@ -56,8 +61,13 @@ fn collect_params(node: &dyn BaseNode) -> Vec<String> {
 
 /// Serializes the whole editor graph to a pretty-printed JSON string.
 pub fn serialize_graph(snarl: &Snarl<Box<dyn BaseNode>>) -> Result<String, String> {
-    // Capture node ids in a stable order and map each to its array index so
-    // wires can reference nodes positionally.
+    let file = build_graph_file(snarl);
+    serde_json::to_string_pretty(&file).map_err(|e| format!("serialization error: {e}"))
+}
+
+/// Captures a snarl into a [`GraphFile`], recursing into any node's nested loop
+/// body. Node wires reference nodes positionally by their index in `nodes`.
+fn build_graph_file(snarl: &Snarl<Box<dyn BaseNode>>) -> GraphFile {
     let mut order: Vec<NodeId> = Vec::new();
     let mut index_of: std::collections::HashMap<NodeId, usize> = std::collections::HashMap::new();
     let mut nodes = Vec::new();
@@ -76,6 +86,7 @@ pub fn serialize_graph(snarl: &Snarl<Box<dyn BaseNode>>) -> Result<String, Strin
             pos,
             open,
             params: collect_params(node.as_ref()),
+            sub_graph: node.sub_snarl().map(build_graph_file),
         });
     }
 
@@ -94,12 +105,11 @@ pub fn serialize_graph(snarl: &Snarl<Box<dyn BaseNode>>) -> Result<String, Strin
         });
     }
 
-    let file = GraphFile {
+    GraphFile {
         version: GRAPH_FILE_VERSION,
         nodes,
         connections,
-    };
-    serde_json::to_string_pretty(&file).map_err(|e| format!("serialization error: {e}"))
+    }
 }
 
 /// Rebuilds the editor graph from a JSON string, replacing the current contents.
@@ -123,6 +133,15 @@ pub fn deserialize_graph(
 
     // Build into a fresh graph first so a malformed entry can't leave the editor
     // half-cleared.
+    *snarl = build_snarl(&file, registry);
+    Ok(())
+}
+
+/// Rebuilds a snarl from a [`GraphFile`], recursing into nested loop bodies.
+///
+/// Unknown node types are skipped (their wires are dropped too) so a graph saved
+/// by a newer build still loads what it can rather than failing outright.
+fn build_snarl(file: &GraphFile, registry: &NodeRegistry) -> Snarl<Box<dyn BaseNode>> {
     let mut new_snarl: Snarl<Box<dyn BaseNode>> = Snarl::new();
     // Maps each node's array index to the NodeId it got in the new graph; `None`
     // for nodes that could not be recreated (unknown type).
@@ -133,6 +152,12 @@ pub fn deserialize_graph(
             Some(mut node) => {
                 for (idx, value) in entry.params.iter().enumerate() {
                     node.set_parameter(idx, value);
+                }
+                // Restore a nested loop body into the node that hosts one.
+                if let (Some(sub_file), Some(sub_snarl)) =
+                    (entry.sub_graph.as_ref(), node.sub_snarl_mut())
+                {
+                    *sub_snarl = build_snarl(sub_file, registry);
                 }
                 let id = new_snarl.insert_node(Pos2::new(entry.pos[0], entry.pos[1]), node);
                 if !entry.open
@@ -168,8 +193,7 @@ pub fn deserialize_graph(
         );
     }
 
-    *snarl = new_snarl;
-    Ok(())
+    new_snarl
 }
 
 #[cfg(test)]
@@ -213,5 +237,30 @@ mod tests {
             .find(|n| n.name() == "TextInputNode")
             .expect("text input restored");
         assert_eq!(text_input.get_parameter(0).as_deref(), Some("hello"));
+    }
+
+    #[test]
+    fn round_trips_foreach_loop_body() {
+        let registry = NodeRegistry::new();
+        let mut snarl: Snarl<Box<dyn BaseNode>> = Snarl::new();
+
+        // A fresh ForEach is scaffolded with an ItemInput + ItemOutput in its body.
+        let foreach = registry.create_node("ForEach").unwrap();
+        snarl.insert_node(Pos2::new(50.0, 50.0), foreach);
+
+        let json = serialize_graph(&snarl).expect("serialize");
+        let mut restored: Snarl<Box<dyn BaseNode>> = Snarl::new();
+        deserialize_graph(&json, &registry, &mut restored).expect("deserialize");
+
+        let foreach = restored
+            .node_ids()
+            .map(|(_, n)| n)
+            .find(|n| n.name() == "ForEach")
+            .expect("foreach restored");
+        let body = foreach.sub_snarl().expect("foreach has a loop body");
+
+        let mut body_nodes: Vec<&str> = body.node_ids().map(|(_, n)| n.name()).collect();
+        body_nodes.sort();
+        assert_eq!(body_nodes, vec!["ItemInput", "ItemOutput"]);
     }
 }

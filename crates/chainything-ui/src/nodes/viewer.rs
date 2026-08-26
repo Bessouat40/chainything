@@ -3,8 +3,6 @@
 use crate::nodes::base_node::BaseNode;
 use crate::nodes::node_registry::NodeRegistry;
 
-use std::mem::discriminant;
-
 use egui::Ui;
 use egui_snarl::{
     InPin, NodeId, OutPin, Snarl,
@@ -13,12 +11,17 @@ use egui_snarl::{
 
 pub struct DemoViewer {
     pub node_registry: NodeRegistry,
+    /// Set from the node menu when the user asks to edit a node's loop body.
+    /// [`DAGLayout`](crate::dag_layout::DAGLayout) consumes it after rendering to
+    /// drill into that node's sub-pipeline. `None` the rest of the time.
+    pub enter_request: Option<NodeId>,
 }
 
 impl DemoViewer {
     pub fn new() -> Self {
         Self {
             node_registry: NodeRegistry::new(),
+            enter_request: None,
         }
     }
 }
@@ -37,7 +40,7 @@ impl SnarlViewer<Box<dyn BaseNode>> for DemoViewer {
         if let (Some(out_map), Some(in_map)) = (from_node.mapping_output(), to_node.mapping_input())
             && let (Some(out_type), Some(in_type)) =
                 (out_map.get(&out_pin_idx), in_map.get(&in_pin_idx))
-            && discriminant(out_type) == discriminant(in_type)
+            && out_type.connects_to(in_type)
         {
             snarl.connect(from.id, to.id);
         }
@@ -107,6 +110,10 @@ impl SnarlViewer<Box<dyn BaseNode>> for DemoViewer {
         snarl: &mut Snarl<Box<dyn BaseNode>>,
     ) {
         ui.label("Node menu");
+        if snarl[node].has_sub_editor() && ui.button("Edit loop body").clicked() {
+            self.enter_request = Some(node);
+            ui.close();
+        }
         if ui.button("Remove").clicked() {
             snarl.remove_node(node);
             ui.close();
