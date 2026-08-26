@@ -1,23 +1,12 @@
 use std::collections::HashMap;
 
 use crate::nodes::{
-    base_node::BaseNode,
-    images::{
-        blur_node::BlurNode, brightness_node::BrightnessNode, edge_detect_node::EdgeDetectNode,
-        greyscale_node::GreyScaleNode, image_display_node::ImageDisplayNode,
-        image_reader_node::ImageReaderNode, image_saver_node::ImageSaveNode,
-        invert_node::InvertNode, merge_node::MergeNode, resize_node::ResizeNode,
-        rotate_node::RotateNode, threshold_node::ThresholdNode,
-    },
-    llm::{
-        llm_generate_node::LlmGenerateNode, ollama_loader_node::OllamaLoaderNode,
-        vlm_generate_node::VlmGenerateNode,
-    },
-    model3d::{
+    base_node::BaseNode, images::{
+        blur_node::BlurNode, brightness_node::BrightnessNode, edge_detect_node::EdgeDetectNode, greyscale_node::GreyScaleNode, image_display_node::ImageDisplayNode, image_reader_node::ImageReaderNode, image_saver_node::ImageSaveNode, invert_node::InvertNode, merge_node::MergeNode, resize_node::ResizeNode, rotate_node::RotateNode, threshold_node::ThresholdNode, upload_image_node::ImageUploadNode
+    }, llm::{llm_generate_node::LlmGenerateNode, ollama_loader_node::OllamaLoaderNode, vlm_generate_node::VlmGenerateNode}, model3d::{
         model_reader_node::ModelReaderNode, model_render_node::ModelRenderNode,
         model_saver_node::ModelSaveNode, model_scale_node::ModelScaleNode,
-    },
-    text::{
+    }, text::{
         text_display_node::TextDisplayNode, text_input_node::TextInputNode,
         text_saver_node::TextSaveNode,
     },
@@ -38,6 +27,10 @@ impl NodeRegistry {
             (
                 TextInputNode::new().name().to_string(),
                 Box::new(TextInputNode::new()) as Box<dyn BaseNode>,
+            ),
+            (
+                ImageUploadNode::new().name().to_string(),
+                Box::new(ImageUploadNode::new()) as Box<dyn BaseNode>,
             ),
             (
                 ImageReaderNode::new().name().to_string(),

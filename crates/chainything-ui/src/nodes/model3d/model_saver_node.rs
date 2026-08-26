@@ -89,12 +89,11 @@ impl BaseNode for ModelSaveNode {
     }
 
     fn show_body(
-        &self,
+        &mut self,
         _node: NodeId,
         _inputs: &[InPin],
         _outputs: &[OutPin],
         ui: &mut Ui,
-        _snarl: &Snarl<Box<dyn BaseNode>>,
     ) {
         ui.with_layout(egui::Layout::top_down(egui::Align::Min), |ui| {
             ui.set_width(200.0);

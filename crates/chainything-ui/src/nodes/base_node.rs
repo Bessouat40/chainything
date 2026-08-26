@@ -115,12 +115,11 @@ pub trait BaseNode: DynClone {
     fn get_value(&self) -> Option<&Vec<InputOutputType>>;
     fn header_frame(&self, frame: egui::Frame) -> egui::Frame;
     fn show_body(
-        &self,
+        &mut self,
         _node: NodeId,
         _inputs: &[InPin],
         _outputs: &[OutPin],
         _ui: &mut Ui,
-        _snarl: &Snarl<Box<dyn BaseNode>>,
     ) {
     }
     fn get_parameter(&self, _index: usize) -> Option<String> {

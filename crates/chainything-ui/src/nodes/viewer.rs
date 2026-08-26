@@ -88,10 +88,9 @@ impl SnarlViewer<Box<dyn BaseNode>> for DemoViewer {
         ui: &mut Ui,
         snarl: &mut Snarl<Box<dyn BaseNode>>,
     ) {
-        let snarl_ref = &*snarl;
-        let base_node = &snarl_ref[node];
+        let base_node = &mut snarl[node];
 
-        base_node.show_body(node, inputs, outputs, ui, snarl_ref);
+        base_node.show_body(node, inputs, outputs, ui);
     }
 
     fn has_node_menu(&mut self, _node: &Box<dyn BaseNode>) -> bool {

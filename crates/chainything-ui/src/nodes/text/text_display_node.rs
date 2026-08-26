@@ -130,12 +130,11 @@ impl BaseNode for TextDisplayNode {
     }
 
     fn show_body(
-        &self,
+        &mut self,
         _node: NodeId,
         inputs: &[InPin],
         _outputs: &[OutPin],
         ui: &mut Ui,
-        _snarl: &Snarl<Box<dyn BaseNode>>,
     ) {
         let connected = inputs
             .first()

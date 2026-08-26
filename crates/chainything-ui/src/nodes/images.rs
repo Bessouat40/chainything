@@ -10,3 +10,4 @@ pub mod merge_node;
 pub mod resize_node;
 pub mod rotate_node;
 pub mod threshold_node;
+pub mod upload_image_node;

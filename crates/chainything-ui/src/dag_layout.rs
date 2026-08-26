@@ -143,22 +143,32 @@ impl DAGLayout {
             return;
         }
 
-        // Free stale results (and their GPU textures) so the run shows fresh
-        // output and unconnected display nodes don't pin memory indefinitely.
         for (_id, node) in self.snarl.node_ids() {
             node.clear_display();
         }
 
-        let json = self.export_to_json();
+        route_direct_display_values(&self.snarl);
+
         self.bindings = compute_display_bindings(&self.snarl);
+
+        let pipeline = match build_pipeline_from_snarl(&self.snarl) {
+            Ok(pipeline) => pipeline,
+
+            Err(err) => {
+                eprintln!("✗ Pipeline build error: {}", err);
+                return;
+            }
+        };
 
         let running = Arc::clone(&self.running);
         let result = Arc::clone(&self.result);
+
         *running.lock().unwrap() = true;
         *result.lock().unwrap() = None;
 
         std::thread::spawn(move || {
-            let outcome = run_pipeline_collect(&json);
+            let outcome = run_pipeline_collect(pipeline);
+
             *result.lock().unwrap() = Some(outcome);
             *running.lock().unwrap() = false;
         });
@@ -197,15 +207,225 @@ impl DAGLayout {
     }
 }
 
-/// Builds the pipeline from JSON, executes it and returns every output.
-fn run_pipeline_collect(json: &str) -> Result<ExecOutput, String> {
+fn input_output_to_source(value: &InputOutputType) -> Result<InputSource, String> {
+    match value {
+        InputOutputType::String(value) => {
+            Ok(InputSource::static_data(value.clone()))
+        }
+
+        InputOutputType::RawImage(Some(image)) => {
+            Ok(InputSource::static_data(image.clone()))
+        }
+
+        InputOutputType::RawImage(None) => {
+            Err("RawImage source contains no image".to_string())
+        }
+
+        InputOutputType::Mesh3D(Some(mesh)) => {
+            Ok(InputSource::static_data(mesh.clone()))
+        }
+
+        InputOutputType::Mesh3D(None) => {
+            Err("Mesh3D source contains no mesh".to_string())
+        }
+
+        InputOutputType::Llm => {
+            Err("LLM values cannot be provided directly as static node values".to_string())
+        }
+    }
+}
+
+fn build_pipeline_from_snarl(
+    snarl: &Snarl<Box<dyn BaseNode>>,
+) -> Result<Pipeline, String> {
     let registry = ProcessorRegistry::with_standard_processors();
-    let mut pipeline = PipelineBuilder::build_from_json(json, &registry)
-        .map_err(|e| format!("build error: {:?}", e))?;
+    let mut pipeline = Pipeline::new();
+
+    let mut id_map = HashMap::new();
+
+    for (index, (node_id, _)) in snarl.node_ids().enumerate() {
+        id_map.insert(node_id, index.to_string());
+    }
+
+    for (node_id, node) in snarl.node_ids() {
+        if !node.is_processor() {
+            continue;
+        }
+
+        let processor_id = id_map
+            .get(&node_id)
+            .ok_or_else(|| {
+                format!(
+                    "Unable to find pipeline id for node {}",
+                    node.name()
+                )
+            })?
+            .clone();
+
+        let processor_type = node.name().replace("Node", "");
+
+        let processor = registry
+            .build_processor(
+                &processor_type,
+                processor_id.clone(),
+            )
+            .map_err(|err| {
+                format!(
+                    "Failed to build processor {}: {}",
+                    processor_type,
+                    err
+                )
+            })?;
+
+        let mut inputs = Vec::new();
+
+        for input_idx in 0..node.inputs_count() {
+            let in_pin_id = InPinId {
+                node: node_id,
+                input: input_idx,
+            };
+
+            let in_pin = snarl.in_pin(in_pin_id);
+
+            let Some(out_pin) = in_pin.remotes.first() else {
+                continue;
+            };
+
+            let source_node = snarl
+                .get_node(out_pin.node)
+                .ok_or_else(|| {
+                    format!(
+                        "Source node not found for input {} of {}",
+                        input_idx,
+                        node.name()
+                    )
+                })?;
+
+            if source_node.is_processor() {
+                let source_node_id = id_map
+                    .get(&out_pin.node)
+                    .ok_or_else(|| {
+                        format!(
+                            "Unable to find pipeline id for source processor {}",
+                            source_node.name()
+                        )
+                    })?
+                    .clone();
+
+                inputs.push(
+                    InputSource::connection(
+                        source_node_id,
+                        out_pin.output,
+                    )
+                );
+
+                continue;
+            }
+
+            let values = source_node
+                .get_value()
+                .ok_or_else(|| {
+                    format!(
+                        "Source node {} has no runtime value",
+                        source_node.name()
+                    )
+                })?;
+
+            let value = values
+                .get(out_pin.output)
+                .ok_or_else(|| {
+                    format!(
+                        "Output slot {} does not exist on source node {}",
+                        out_pin.output,
+                        source_node.name()
+                    )
+                })?;
+
+            let source = input_output_to_source(value)?;
+
+            inputs.push(source);
+        }
+
+        let mut parameter_index = 0;
+
+        while let Some(parameter) = node.get_parameter(parameter_index) {
+            inputs.push(
+                InputSource::static_data(parameter)
+            );
+
+            parameter_index += 1;
+        }
+
+        pipeline.add_processor(
+            processor,
+            inputs,
+        );
+    }
+
+    Ok(pipeline)
+}
+
+/// Builds the pipeline from JSON, executes it and returns every output.
+fn run_pipeline_collect(
+    mut pipeline: Pipeline,
+) -> Result<ExecOutput, String> {
     pipeline
         .execute()
         .map_err(|e| format!("execution error: {:?}", e))?;
+
     Ok(pipeline.collect_outputs())
+}
+
+
+fn route_direct_display_values(snarl: &Snarl<Box<dyn BaseNode>>) {
+    for (display_id, display_node) in snarl.node_ids() {
+        if display_node.is_processor() || display_node.inputs_count() == 0 {
+            continue;
+        }
+
+        for input_idx in 0..display_node.inputs_count() {
+            let in_pin = snarl.in_pin(InPinId {
+                node: display_id,
+                input: input_idx,
+            });
+
+            let Some(remote) = in_pin.remotes.first() else {
+                continue;
+            };
+
+            let Some(source_node) = snarl.get_node(remote.node) else {
+                continue;
+            };
+
+            if source_node.is_processor() {
+                continue;
+            }
+
+            let Some(values) = source_node.get_value() else {
+                continue;
+            };
+
+            let Some(value) = values.get(remote.output) else {
+                continue;
+            };
+
+            match value {
+                InputOutputType::RawImage(Some(image)) => {
+                    display_node.set_display(
+                        DisplayData::Image(image.clone())
+                    );
+                }
+
+                InputOutputType::String(text) => {
+                    display_node.set_display(
+                        DisplayData::Text(text.clone())
+                    );
+                }
+
+                _ => {}
+            }
+        }
+    }
 }
 
 /// Captures, for each display node, the processor output that feeds it.

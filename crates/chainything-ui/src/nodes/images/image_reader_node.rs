@@ -7,7 +7,7 @@ use crate::nodes::base_node::{
 
 use egui::Ui;
 use egui_snarl::{
-    InPin, NodeId, OutPin, Snarl,
+    InPin, NodeId, OutPin,
     ui::{PinInfo, WireStyle},
 };
 
@@ -88,12 +88,11 @@ impl BaseNode for ImageReaderNode {
     }
 
     fn show_body(
-        &self,
+        &mut self,
         _node: NodeId,
         _inputs: &[InPin],
         _outputs: &[OutPin],
         ui: &mut Ui,
-        _snarl: &Snarl<Box<dyn BaseNode>>,
     ) {
         ui.with_layout(egui::Layout::top_down(egui::Align::Min), |ui| {
             ui.set_width(200.0);
